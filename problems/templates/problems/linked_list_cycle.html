@@ -1,0 +1,292 @@
+<!-- difficulty: Easy | tags: linked-list,two-pointers | category: Linked List -->
+{% extends "problems/base.html" %}
+{% block title %}Linked List Cycle{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.error { background: #fef2f2; border-left-color: #ef4444; color: #991b1b; }
+  .status-panel.success { background: #fce7f3; border-left-color: #db2777; color: #831843; } /* Pink/Red for cycle found */
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 60px 20px 40px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    position: relative;
+    min-height: 180px;
+  }
+  
+  .list-track {
+    display: flex;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .list-node {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border: 2px solid #64748b;
+    border-radius: 50%;
+    background: white;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #334155;
+    margin-right: 25px;
+    position: relative;
+    z-index: 2;
+    transition: all 0.3s ease;
+  }
+  
+  .list-node.collision {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    transform: scale(1.1);
+  }
+
+  .arrow { 
+    position: absolute;
+    color: #94a3b8; 
+    font-weight: bold;
+    font-size: 20px;
+    z-index: 1;
+  }
+
+  /* Tortoise & Hare */
+  .ptr {
+    position: absolute;
+    font-size: 24px;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+  }
+  .ptr-slow { top: -35px; } /* Tortoise */
+  .ptr-fast { bottom: -35px; } /* Hare */
+
+  /* The Cycle SVG line */
+  .cycle-svg {
+    position: absolute;
+    top: -30px;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cycle-path {
+    fill: none;
+    stroke: #94a3b8;
+    stroke-width: 2;
+    stroke-dasharray: 6;
+    marker-end: url(#arrowhead);
+  }
+
+</style>
+
+<h1>Linked List Cycle</h1>
+<p>Given <code>head</code>, the head of a linked list, determine if the linked list has a cycle in it using Floyd's Cycle-Finding Algorithm (Tortoise and Hare).</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def hasCycle(head: Optional[ListNode]) -> bool:
+    slow, fast = head, head
+    
+    while fast and fast.next:
+        slow = slow.next
+        fast = fast.next.next
+        
+        if slow == fast:
+            return True
+            
+    return False
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>bool hasCycle(ListNode *head) {
+    ListNode *slow = head, *fast = head;
+    
+    while (fast && fast->next) {
+        slow = slow->next;
+        fast = fast->next->next;
+        if (slow == fast) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public boolean hasCycle(ListNode head) {
+    ListNode slow = head, fast = head;
+    
+    while (fast != null && fast.next != null) {
+        slow = slow.next;
+        fast = fast.next.next;
+        if (slow == fast) {
+            return true;
+        }
+    }
+    return false;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>head = [3, 2, 0, -4]</code>, pos = 1 (tail connects to node index 1)</p>
+<div id="status" class="status-panel">Click Play to start the Tortoise & Hare algorithm.</div>
+
+<div id="viz" class="viz-container">
+  
+  <svg class="cycle-svg">
+    <defs>
+      <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+        <polygon points="0 0, 10 3.5, 0 7" fill="#94a3b8" />
+      </marker>
+    </defs>
+    <!-- Hardcoded path for visual loop from -4 back to 2 -->
+    <path class="cycle-path" d="M 280, 120 Q 180, 180 100, 120" />
+  </svg>
+
+  <div id="list-track" class="list-track">
+    <!-- Built by JS to allow proper positioning -->
+  </div>
+  
+  <div id="ptr-slow" class="ptr ptr-slow" style="opacity:0;" title="Slow (Tortoise)">🐢</div>
+  <div id="ptr-fast" class="ptr ptr-fast" style="opacity:0;" title="Fast (Hare)">🐇</div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const vals = [3, 2, 0, "-4"];
+  const cycleIndex = 1; // Connects back to 2
+  
+  const track = document.getElementById("list-track");
+  const ptrSlow = document.getElementById("ptr-slow");
+  const ptrFast = document.getElementById("ptr-fast");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  let nodeEls = [];
+
+  function initUI() {
+    track.innerHTML = "";
+    nodeEls = [];
+    
+    vals.forEach((v, i) => {
+      let n = document.createElement("div");
+      n.className = "list-node";
+      n.textContent = v;
+      track.appendChild(n);
+      nodeEls.push(n);
+      
+      if (i < vals.length - 1) {
+        let arr = document.createElement("div");
+        arr.className = "arrow";
+        arr.innerHTML = "&rarr;";
+        arr.style.left = `${(i * 70) + 45}px`; 
+        track.appendChild(arr);
+      }
+    });
+    
+    ptrSlow.style.opacity = "0";
+    ptrFast.style.opacity = "0";
+  }
+  
+  initUI();
+
+  function movePointer(ptrEl, index) {
+    if (index >= nodeEls.length) return; // safety
+    ptrEl.style.opacity = "1";
+    // Node is 45px wide, margin 25px. So 70px per step.
+    const left = index * 70 + (45/2) - 12; // Center emoji
+    ptrEl.style.left = `${left}px`;
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    
+    nodeEls.forEach(n => n.classList.remove("collision"));
+    
+    let slow = 0;
+    let fast = 0;
+    
+    movePointer(ptrSlow, slow);
+    movePointer(ptrFast, fast);
+    
+    status.innerHTML = `Start 🐢 (slow) and 🐇 (fast) at head.`;
+    await delay(1500);
+    
+    let steps = 0;
+    // Cap to prevent infinite loops if logic fails
+    while (steps < 10) {
+      steps++;
+      
+      // Move Slow +1
+      slow = (slow + 1) % vals.length; // Simulate cycle mathematically for UI
+      
+      // Move Fast +2
+      fast = (fast + 2) % vals.length;
+      
+      status.innerHTML = `🐢 moves 1 step. 🐇 moves 2 steps.`;
+      movePointer(ptrSlow, slow);
+      movePointer(ptrFast, fast);
+      
+      await delay(1500);
+      
+      if (slow === fast) {
+        nodeEls[slow].classList.add("collision");
+        status.className = "status-panel success";
+        status.innerHTML = `<strong>Collision!</strong> 🐢 and 🐇 met at node ${vals[slow]}. A cycle exists. Return <strong>True</strong>.`;
+        break;
+      }
+    }
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
