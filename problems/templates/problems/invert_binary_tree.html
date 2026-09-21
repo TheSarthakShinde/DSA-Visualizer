@@ -1,0 +1,364 @@
+<!-- difficulty: Easy | tags: tree,recursion | category: Trees & Tries -->
+{% extends "problems/base.html" %}
+{% block title %}Invert Binary Tree{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    position: relative;
+    height: 320px;
+    overflow: hidden;
+  }
+
+  .tree-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .tree-edge {
+    stroke: #94a3b8;
+    stroke-width: 3;
+    transition: all 0.6s ease-in-out;
+  }
+
+  .tree-node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 3px solid #64748b;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #334155;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    transition: left 0.6s ease-in-out, top 0.6s ease-in-out, background 0.3s, border-color 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+
+  .tree-node.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  
+  .tree-node.swapping {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+  }
+
+  .tree-node.done {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+  }
+</style>
+
+<h1>Invert Binary Tree</h1>
+<p>Given the <code>root</code> of a binary tree, invert the tree, and return its root.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def invertTree(root: Optional[TreeNode]) -> Optional[TreeNode]:
+    if not root:
+        return None
+        
+    # Swap the left and right children
+    temp = root.left
+    root.left = root.right
+    root.right = temp
+    
+    # Recursively invert subtrees
+    invertTree(root.left)
+    invertTree(root.right)
+    
+    return root
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>TreeNode* invertTree(TreeNode* root) {
+    if (root == nullptr) return nullptr;
+    
+    TreeNode* temp = root->left;
+    root->left = root->right;
+    root->right = temp;
+    
+    invertTree(root->left);
+    invertTree(root->right);
+    
+    return root;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public TreeNode invertTree(TreeNode root) {
+    if (root == null) return null;
+    
+    TreeNode temp = root.left;
+    root.left = root.right;
+    root.right = temp;
+    
+    invertTree(root.left);
+    invertTree(root.right);
+    
+    return root;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>root = [4, 2, 7, 1, 3, 6, 9]</code></p>
+<div id="status" class="status-panel">Click Play to start the recursive inversion.</div>
+
+<div id="viz" class="viz-container">
+  <svg class="tree-svg" id="tree-svg"></svg>
+  <div id="tree-nodes"></div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  class Node {
+    constructor(id, val) {
+      this.id = id;
+      this.val = val;
+      this.left = null;
+      this.right = null;
+      this.x = 0;
+      this.y = 0;
+    }
+  }
+
+  const container = document.getElementById("viz");
+  const svg = document.getElementById("tree-svg");
+  const nodesDiv = document.getElementById("tree-nodes");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+  
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  let root = null;
+  let animFrame = null;
+
+  function buildInitialTree() {
+    nodesDiv.innerHTML = "";
+    svg.innerHTML = "";
+    
+    root = new Node(0, 4);
+    root.left = new Node(1, 2);
+    root.right = new Node(2, 7);
+    root.left.left = new Node(3, 1);
+    root.left.right = new Node(4, 3);
+    root.right.left = new Node(5, 6);
+    root.right.right = new Node(6, 9);
+    
+    const allNodes = [root, root.left, root.right, root.left.left, root.left.right, root.right.left, root.right.right];
+    
+    allNodes.forEach(n => {
+      let el = document.createElement("div");
+      el.className = "tree-node";
+      el.id = `node-${n.id}`;
+      el.textContent = n.val;
+      nodesDiv.appendChild(el);
+      
+      if (n !== root) {
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("class", "tree-edge");
+        line.id = `edge-${n.id}`;
+        svg.appendChild(line);
+      }
+    });
+    
+    calculatePositions(root, 0, container.offsetWidth, 50);
+    applyPositions(root);
+  }
+
+  function calculatePositions(node, leftBound, rightBound, depthY) {
+    if (!node) return;
+    node.x = (leftBound + rightBound) / 2;
+    node.y = depthY;
+    
+    calculatePositions(node.left, leftBound, node.x, depthY + 80);
+    calculatePositions(node.right, node.x, rightBound, depthY + 80);
+  }
+
+  function applyPositions(node) {
+    if (!node) return;
+    
+    const el = document.getElementById(`node-${node.id}`);
+    el.style.left = `${node.x}px`;
+    el.style.top = `${node.y}px`;
+    
+    if (node.left) {
+      const line = document.getElementById(`edge-${node.left.id}`);
+      line.setAttribute("x1", node.x);
+      line.setAttribute("y1", node.y);
+      line.setAttribute("x2", node.left.x);
+      line.setAttribute("y2", node.left.y);
+    }
+    if (node.right) {
+      const line = document.getElementById(`edge-${node.right.id}`);
+      line.setAttribute("x1", node.x);
+      line.setAttribute("y1", node.y);
+      line.setAttribute("x2", node.right.x);
+      line.setAttribute("y2", node.right.y);
+    }
+    
+    applyPositions(node.left);
+    applyPositions(node.right);
+  }
+
+  // Animation loop to keep SVG lines attached during CSS transitions
+  function updateLinesLoop() {
+    function update(node) {
+      if (!node) return;
+      const parentEl = document.getElementById(`node-${node.id}`);
+      const px = parseFloat(parentEl.style.left);
+      const py = parseFloat(parentEl.style.top);
+      
+      if (node.left) {
+        const childEl = document.getElementById(`node-${node.left.id}`);
+        const line = document.getElementById(`edge-${node.left.id}`);
+        line.setAttribute("x1", px); line.setAttribute("y1", py);
+        line.setAttribute("x2", parseFloat(childEl.style.left)); line.setAttribute("y2", parseFloat(childEl.style.top));
+      }
+      if (node.right) {
+        const childEl = document.getElementById(`node-${node.right.id}`);
+        const line = document.getElementById(`edge-${node.right.id}`);
+        line.setAttribute("x1", px); line.setAttribute("y1", py);
+        line.setAttribute("x2", parseFloat(childEl.style.left)); line.setAttribute("y2", parseFloat(childEl.style.top));
+      }
+      update(node.left);
+      update(node.right);
+    }
+    update(root);
+    animFrame = requestAnimationFrame(updateLinesLoop);
+  }
+
+  // Listen for resize
+  window.addEventListener('resize', () => {
+    if(root) {
+      calculatePositions(root, 0, container.offsetWidth, 50);
+      applyPositions(root);
+    }
+  });
+
+  buildInitialTree();
+
+  async function invert(node) {
+    if (!node) return;
+    
+    let el = document.getElementById(`node-${node.id}`);
+    el.classList.add("active");
+    status.innerHTML = `Visiting Node <strong>${node.val}</strong>.`;
+    await delay(800);
+    
+    if (node.left || node.right) {
+      status.className = "status-panel info";
+      status.innerHTML = `Swapping left and right children of Node <strong>${node.val}</strong>.`;
+      
+      if (node.left) document.getElementById(`node-${node.left.id}`).classList.add("swapping");
+      if (node.right) document.getElementById(`node-${node.right.id}`).classList.add("swapping");
+      
+      // Swap data
+      let temp = node.left;
+      node.left = node.right;
+      node.right = temp;
+      
+      // Recalculate & Animate
+      calculatePositions(root, 0, container.offsetWidth, 50);
+      applyPositions(root);
+      
+      await delay(1000); // Wait for transition
+      
+      if (node.left) document.getElementById(`node-${node.left.id}`).classList.remove("swapping");
+      if (node.right) document.getElementById(`node-${node.right.id}`).classList.remove("swapping");
+    }
+    
+    el.classList.remove("active");
+    el.classList.add("done");
+    
+    status.className = "status-panel";
+    
+    // Recurse
+    if(node.left) {
+      status.innerHTML = `Recursing left to Node <strong>${node.left.val}</strong>.`;
+      await delay(600);
+      await invert(node.left);
+    }
+    
+    if(node.right) {
+      status.innerHTML = `Recursing right to Node <strong>${node.right.val}</strong>.`;
+      await delay(600);
+      await invert(node.right);
+    }
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    if (animFrame) cancelAnimationFrame(animFrame);
+    
+    buildInitialTree();
+    updateLinesLoop();
+    
+    await delay(500);
+    await invert(root);
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> The binary tree has been completely inverted.`;
+    
+    cancelAnimationFrame(animFrame);
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
