@@ -1,0 +1,355 @@
+<!-- difficulty: Easy | tags: linked-list,recursion | category: Linked List -->
+{% extends "problems/base.html" %}
+{% block title %}Reverse Linked List{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 30px 20px 50px 20px;
+    margin-bottom: 20px;
+    overflow-x: auto;
+  }
+  
+  .list-track {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 600px;
+    position: relative;
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+
+  .node-wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+  }
+
+  .list-node {
+    display: flex;
+    width: 60px;
+    height: 40px;
+    border: 2px solid #64748b;
+    border-radius: 6px;
+    background: white;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    color: #334155;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+  }
+  
+  .node-val {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+  }
+  
+  .node-next {
+    width: 20px;
+    background: #e2e8f0;
+    border-left: 2px solid #64748b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .list-node.active { border-color: #3b82f6; transform: translateY(-4px); box-shadow: 0 8px 15px rgba(59, 130, 246, 0.2); }
+  .list-node.active .node-next { border-left-color: #3b82f6; background: #eff6ff; }
+  
+  .list-node.reversed { border-color: #10b981; }
+  .list-node.reversed .node-next { border-left-color: #10b981; background: #ecfdf5; }
+
+  .arrow-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #94a3b8;
+    font-size: 24px;
+    font-weight: bold;
+    transition: transform 0.4s ease;
+  }
+  .arrow-box.reversed { color: #10b981; transform: rotate(180deg); }
+  
+  .null-node {
+    font-family: monospace;
+    font-weight: bold;
+    color: #94a3b8;
+    padding: 0 10px;
+  }
+
+  /* Pointers */
+  .ptr {
+    position: absolute;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 14px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.4s ease;
+    opacity: 0;
+  }
+  .ptr.visible { opacity: 1; }
+  .ptr-prev { bottom: -30px; background: #fef3c7; color: #d97706; border: 1px solid #fcd34d; }
+  .ptr-curr { top: -30px; background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+  .ptr-nxt { bottom: -30px; background: #f3e8ff; color: #9333ea; border: 1px solid #e9d5ff; }
+
+</style>
+
+<h1>Reverse Linked List</h1>
+<p>Given the <code>head</code> of a singly linked list, reverse the list, and return the reversed list.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def reverseList(head: Optional[ListNode]) -> Optional[ListNode]:
+    prev = None
+    curr = head
+    
+    while curr:
+        nxt = curr.next
+        curr.next = prev
+        prev = curr
+        curr = nxt
+        
+    return prev
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>ListNode* reverseList(ListNode* head) {
+    ListNode* prev = nullptr;
+    ListNode* curr = head;
+    
+    while (curr != nullptr) {
+        ListNode* nxt = curr->next;
+        curr->next = prev;
+        prev = curr;
+        curr = nxt;
+    }
+    
+    return prev;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public ListNode reverseList(ListNode head) {
+    ListNode prev = null;
+    ListNode curr = head;
+    
+    while (curr != null) {
+        ListNode nxt = curr.next;
+        curr.next = prev;
+        prev = curr;
+        curr = nxt;
+    }
+    
+    return prev;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>head = [1, 2, 3, 4, 5]</code></p>
+<div id="status" class="status-panel">Click Play to start the pointer manipulation.</div>
+
+<div id="viz" class="viz-container">
+  <div id="list-track" class="list-track">
+    <div class="null-node" id="node-null-left">null</div>
+    <div class="arrow-box" style="opacity:0;">&rarr;</div>
+    
+    <!-- Nodes generated by JS -->
+    
+    <div class="arrow-box" id="arrow-last">&rarr;</div>
+    <div class="null-node" id="node-null-right">null</div>
+    
+    <!-- Pointers -->
+    <div id="ptr-prev" class="ptr ptr-prev">prev</div>
+    <div id="ptr-curr" class="ptr ptr-curr">curr</div>
+    <div id="ptr-nxt" class="ptr ptr-nxt">nxt</div>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const vals = [1, 2, 3, 4, 5];
+  const track = document.getElementById("list-track");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+  
+  const ptrPrev = document.getElementById("ptr-prev");
+  const ptrCurr = document.getElementById("ptr-curr");
+  const ptrNxt = document.getElementById("ptr-nxt");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  let nodeEls = [];
+  let arrowEls = [];
+
+  function buildList() {
+    // Clean up dynamic elements
+    track.querySelectorAll('.dynamic-node').forEach(el => el.remove());
+    nodeEls = [];
+    arrowEls = [];
+    
+    const lastArrow = document.getElementById("arrow-last");
+    
+    vals.forEach((v, i) => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "node-wrapper dynamic-node";
+      
+      const node = document.createElement("div");
+      node.className = "list-node";
+      node.id = `node-${i}`;
+      node.innerHTML = `<div class="node-val">${v}</div><div class="node-next">•</div>`;
+      
+      wrapper.appendChild(node);
+      track.insertBefore(wrapper, lastArrow);
+      nodeEls.push(node);
+      
+      if (i < vals.length - 1) {
+        const arr = document.createElement("div");
+        arr.className = "arrow-box dynamic-node";
+        arr.id = `arrow-${i}`;
+        arr.innerHTML = "&rarr;";
+        track.insertBefore(arr, lastArrow);
+        arrowEls.push(arr);
+      }
+    });
+    
+    // Initial pointer states (hidden)
+    ptrPrev.classList.remove("visible");
+    ptrCurr.classList.remove("visible");
+    ptrNxt.classList.remove("visible");
+    
+    // Reset final arrow
+    lastArrow.style.opacity = "1";
+    lastArrow.classList.remove("reversed");
+  }
+  
+  buildList();
+
+  function movePointer(ptrEl, targetNode, offset = 0) {
+    if (!targetNode) {
+      ptrEl.classList.remove("visible");
+      return;
+    }
+    ptrEl.classList.add("visible");
+    const trackRect = track.getBoundingClientRect();
+    const nodeRect = targetNode.getBoundingClientRect();
+    // Calculate center relative to track
+    const left = nodeRect.left - trackRect.left + (nodeRect.width / 2) - (ptrEl.offsetWidth / 2) + offset;
+    ptrEl.style.left = `${left}px`;
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    buildList();
+    
+    let prev = -1; // -1 represents null (left)
+    let curr = 0;
+    
+    const nullLeft = document.getElementById("node-null-left");
+    const nullRight = document.getElementById("node-null-right");
+    const lastArrow = document.getElementById("arrow-last");
+    
+    // Initial position
+    movePointer(ptrPrev, nullLeft);
+    movePointer(ptrCurr, nodeEls[curr]);
+    
+    status.innerHTML = `Initialize <code>prev = null</code>, <code>curr = head</code>.`;
+    await delay(1500);
+
+    while (curr < vals.length) {
+      let nxt = curr + 1;
+      
+      // Step 1: Save next
+      status.innerHTML = `<strong>Step 1:</strong> Save next node. <code>nxt = curr.next</code>`;
+      nodeEls[curr].classList.add("active");
+      movePointer(ptrNxt, nxt < vals.length ? nodeEls[nxt] : nullRight, 30);
+      await delay(1500);
+      
+      // Step 2: Reverse link
+      status.className = "status-panel info";
+      status.innerHTML = `<strong>Step 2:</strong> Reverse the pointer. <code>curr.next = prev</code>`;
+      
+      // Visual reversal
+      if (curr === 0) {
+        // Point to null
+        nodeEls[curr].classList.add("reversed");
+      } else {
+        arrowEls[curr - 1].classList.add("reversed");
+        nodeEls[curr].classList.add("reversed");
+      }
+      await delay(1500);
+      
+      // Step 3: Move Prev
+      status.className = "status-panel";
+      status.innerHTML = `<strong>Step 3:</strong> Advance prev. <code>prev = curr</code>`;
+      prev = curr;
+      movePointer(ptrPrev, nodeEls[prev], -30);
+      nodeEls[curr].classList.remove("active");
+      await delay(1200);
+      
+      // Step 4: Move Curr
+      status.innerHTML = `<strong>Step 4:</strong> Advance curr. <code>curr = nxt</code>`;
+      curr = nxt;
+      movePointer(ptrCurr, curr < vals.length ? nodeEls[curr] : nullRight);
+      await delay(1200);
+    }
+    
+    lastArrow.style.opacity = "0"; // hide the trailing arrow for reversed list
+    ptrNxt.classList.remove("visible");
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> <code>curr</code> has reached null. Return <code>prev</code> as the new head.`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
