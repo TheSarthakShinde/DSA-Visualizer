@@ -1,0 +1,374 @@
+<!-- difficulty: Easy | tags: linked-list,two-pointers | category: Linked List -->
+{% extends "problems/base.html" %}
+{% block title %}Merge Two Sorted Lists{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-x: auto;
+  }
+  
+  .track-label {
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #64748b;
+    margin-bottom: 5px;
+  }
+  
+  .list-track {
+    display: flex;
+    align-items: center;
+    min-height: 70px;
+    background: white;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 10px;
+    position: relative;
+  }
+  
+  .merged-track {
+    background: #f0fdf4;
+    border: 2px solid #bbf7d0;
+  }
+
+  .list-node {
+    display: flex;
+    width: 45px;
+    height: 35px;
+    border: 2px solid #64748b;
+    border-radius: 4px;
+    background: white;
+    font-family: monospace;
+    font-size: 16px;
+    font-weight: bold;
+    color: #334155;
+    overflow: hidden;
+    margin-right: 10px;
+    transition: all 0.4s ease;
+  }
+  .node-val { flex: 1; display: flex; justify-content: center; align-items: center; }
+  .node-next { width: 15px; background: #e2e8f0; border-left: 1px solid #64748b; }
+  
+  .list-node.active { border-color: #3b82f6; background: #eff6ff; transform: translateY(-4px); box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3); }
+  .list-node.merged { border-color: #10b981; background: #ecfdf5; }
+  .list-node.faded { opacity: 0.2; transform: scale(0.9); border-color: #cbd5e1; }
+
+  .arrow { color: #94a3b8; font-weight: bold; margin-right: 10px; }
+
+  .dummy-node {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 35px;
+    border: 2px dashed #94a3b8;
+    border-radius: 4px;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 12px;
+    font-family: monospace;
+    font-weight: bold;
+    margin-right: 10px;
+  }
+
+  .ptr-label {
+    position: absolute;
+    top: -22px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    transition: left 0.4s ease;
+  }
+  .ptr-l1 { background: #dbeafe; color: #1d4ed8; }
+  .ptr-l2 { background: #f3e8ff; color: #7e22ce; }
+</style>
+
+<h1>Merge Two Sorted Lists</h1>
+<p>You are given the heads of two sorted linked lists <code>list1</code> and <code>list2</code>. Merge the two lists into one sorted list.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def mergeTwoLists(list1: Optional[ListNode], list2: Optional[ListNode]) -> Optional[ListNode]:
+    dummy = ListNode()
+    curr = dummy
+    
+    while list1 and list2:
+        if list1.val < list2.val:
+            curr.next = list1
+            list1 = list1.next
+        else:
+            curr.next = list2
+            list2 = list2.next
+        curr = curr.next
+        
+    if list1:
+        curr.next = list1
+    elif list2:
+        curr.next = list2
+        
+    return dummy.next
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+    ListNode dummy;
+    ListNode* curr = &dummy;
+    
+    while (list1 && list2) {
+        if (list1->val < list2->val) {
+            curr->next = list1;
+            list1 = list1->next;
+        } else {
+            curr->next = list2;
+            list2 = list2->next;
+        }
+        curr = curr->next;
+    }
+    
+    if (list1) curr->next = list1;
+    if (list2) curr->next = list2;
+    
+    return dummy.next;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+    ListNode dummy = new ListNode();
+    ListNode curr = dummy;
+    
+    while (list1 != null && list2 != null) {
+        if (list1.val < list2.val) {
+            curr.next = list1;
+            list1 = list1.next;
+        } else {
+            curr.next = list2;
+            list2 = list2.next;
+        }
+        curr = curr.next;
+    }
+    
+    if (list1 != null) curr.next = list1;
+    if (list2 != null) curr.next = list2;
+    
+    return dummy.next;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>list1 = [1, 2, 4]</code>, <code>list2 = [1, 3, 4]</code></p>
+<div id="status" class="status-panel">Click Play to start the merge algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div>
+    <div class="track-label">List 1</div>
+    <div id="l1-track" class="list-track">
+      <div id="ptr-l1" class="ptr-label ptr-l1">l1</div>
+    </div>
+  </div>
+  
+  <div>
+    <div class="track-label">List 2</div>
+    <div id="l2-track" class="list-track">
+      <div id="ptr-l2" class="ptr-label ptr-l2">l2</div>
+    </div>
+  </div>
+  
+  <div>
+    <div class="track-label">Merged List (curr)</div>
+    <div id="merged-track" class="list-track merged-track">
+      <div class="dummy-node">Dummy</div>
+    </div>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const vals1 = [1, 2, 4];
+  const vals2 = [1, 3, 4];
+  
+  const tr1 = document.getElementById("l1-track");
+  const tr2 = document.getElementById("l2-track");
+  const trM = document.getElementById("merged-track");
+  
+  const ptrL1 = document.getElementById("ptr-l1");
+  const ptrL2 = document.getElementById("ptr-l2");
+  
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  
+  function createNodeEl(val) {
+    const el = document.createElement("div");
+    el.className = "list-node";
+    el.innerHTML = `<div class="node-val">${val}</div><div class="node-next"></div>`;
+    return el;
+  }
+  
+  function createArrow() {
+    const el = document.createElement("div");
+    el.className = "arrow";
+    el.innerHTML = "&rarr;";
+    return el;
+  }
+
+  function initUI() {
+    // Clean old dynamic nodes
+    tr1.querySelectorAll('.list-node, .arrow').forEach(e => e.remove());
+    tr2.querySelectorAll('.list-node, .arrow').forEach(e => e.remove());
+    trM.querySelectorAll('.list-node, .arrow').forEach(e => e.remove());
+    
+    let nodes1 = [];
+    vals1.forEach((v, i) => {
+      let n = createNodeEl(v);
+      tr1.appendChild(n);
+      nodes1.push(n);
+      if (i < vals1.length - 1) tr1.appendChild(createArrow());
+    });
+    
+    let nodes2 = [];
+    vals2.forEach((v, i) => {
+      let n = createNodeEl(v);
+      tr2.appendChild(n);
+      nodes2.push(n);
+      if (i < vals2.length - 1) tr2.appendChild(createArrow());
+    });
+    
+    ptrL1.style.display = "block";
+    ptrL2.style.display = "block";
+    ptrL1.style.left = "10px";
+    ptrL2.style.left = "10px";
+    
+    return { nodes1, nodes2 };
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    
+    let { nodes1, nodes2 } = initUI();
+    let i1 = 0, i2 = 0;
+    
+    while (i1 < vals1.length && i2 < vals2.length) {
+      let v1 = vals1[i1];
+      let v2 = vals2[i2];
+      
+      nodes1[i1].classList.add("active");
+      nodes2[i2].classList.add("active");
+      
+      status.innerHTML = `Comparing <strong>${v1}</strong> (l1) with <strong>${v2}</strong> (l2).`;
+      await delay(1200);
+      
+      let winnerVal;
+      if (v1 <= v2) {
+        status.className = "status-panel info";
+        status.innerHTML = `${v1} &le; ${v2}. Appending <strong>${v1}</strong> to merged list. Advance l1.`;
+        winnerVal = v1;
+        nodes1[i1].classList.remove("active");
+        nodes1[i1].classList.add("faded");
+        nodes2[i2].classList.remove("active");
+        i1++;
+        ptrL1.style.left = `${10 + i1 * 72}px`; 
+      } else {
+        status.className = "status-panel info";
+        status.innerHTML = `${v2} < ${v1}. Appending <strong>${v2}</strong> to merged list. Advance l2.`;
+        winnerVal = v2;
+        nodes2[i2].classList.remove("active");
+        nodes2[i2].classList.add("faded");
+        nodes1[i1].classList.remove("active");
+        i2++;
+        ptrL2.style.left = `${10 + i2 * 72}px`;
+      }
+      
+      trM.appendChild(createArrow());
+      let mergedNode = createNodeEl(winnerVal);
+      mergedNode.classList.add("merged");
+      trM.appendChild(mergedNode);
+      
+      await delay(1200);
+      status.className = "status-panel";
+    }
+    
+    // Append remainders
+    if (i1 < vals1.length) {
+      status.innerHTML = `l2 is exhausted. Append remainder of <strong>l1</strong>.`;
+      while(i1 < vals1.length) {
+        trM.appendChild(createArrow());
+        let mergedNode = createNodeEl(vals1[i1]);
+        mergedNode.classList.add("merged");
+        trM.appendChild(mergedNode);
+        nodes1[i1].classList.add("faded");
+        i1++;
+      }
+    } else if (i2 < vals2.length) {
+      status.innerHTML = `l1 is exhausted. Append remainder of <strong>l2</strong>.`;
+      while(i2 < vals2.length) {
+        trM.appendChild(createArrow());
+        let mergedNode = createNodeEl(vals2[i2]);
+        mergedNode.classList.add("merged");
+        trM.appendChild(mergedNode);
+        nodes2[i2].classList.add("faded");
+        i2++;
+      }
+    }
+    
+    ptrL1.style.display = "none";
+    ptrL2.style.display = "none";
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> Return <code>dummy.next</code> as the head of the newly merged sorted list.`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
