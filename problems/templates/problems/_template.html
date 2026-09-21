@@ -1,0 +1,66 @@
+<!-- category options (must match views.py CATEGORY_ORDER exactly to sort correctly,
+     otherwise it just gets appended at the end):
+     Arrays & Strings | Two Pointers / Sliding Window | Stack & Queue | Linked List |
+     Trees & Tries | Graphs | Dynamic Programming | Binary Search & Sorting |
+     Heaps / Backtracking | Other -->
+<!-- difficulty: Easy | tags: array,hashmap | category: Arrays & Strings -->
+{% extends "problems/base.html" %}
+{% block title %}Problem Title{% endblock %}
+{% block content %}
+
+<h1>Problem Title</h1>
+<p>One or two lines describing the problem statement.</p>
+
+<h2>Solution</h2>
+<pre><code>def solve(nums, target):
+    seen = {}
+    for i, n in enumerate(nums):
+        if target - n in seen:
+            return [seen[target - n], i]
+        seen[n] = i
+</code></pre>
+
+<h2>Visualization</h2>
+<div id="viz" class="viz-box"></div>
+<button id="play" class="btn">Play</button>
+
+<script>
+(function () {
+  const data = [2, 7, 11, 15];   // <-- swap in your own input
+  const target = 9;
+  const box = document.getElementById("viz");
+  const btn = document.getElementById("play");
+
+  function render(highlightA, highlightB) {
+    box.innerHTML = "";
+    data.forEach((val, i) => {
+      const el = document.createElement("div");
+      el.className = "viz-item";
+      if (i === highlightA || i === highlightB) el.classList.add("active");
+      el.textContent = val;
+      box.appendChild(el);
+    });
+  }
+
+  render();
+
+  btn.addEventListener("click", () => {
+    let i = 0;
+    const seen = {};
+    const step = setInterval(() => {
+      if (i >= data.length) { clearInterval(step); return; }
+      const complement = target - data[i];
+      if (complement in seen) {
+        render(seen[complement], i);
+        clearInterval(step);
+        return;
+      }
+      seen[data[i]] = i;
+      render(i, -1);
+      i++;
+    }, 700);
+  });
+})();
+</script>
+
+{% endblock %}

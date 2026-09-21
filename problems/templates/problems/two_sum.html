@@ -1,0 +1,123 @@
+<!-- difficulty: Easy | tags: array,hashmap | category: Arrays & Strings -->
+{% extends "problems/base.html" %}
+{% block title %}Two Sum{% endblock %}
+{% block content %}
+
+<h1>Two Sum</h1>
+<p>Given an array <code>nums</code> and a <code>target</code>, return indices of the two numbers that add up to target.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def two_sum(nums, target):
+    seen = {}
+    for i, n in enumerate(nums):
+        complement = target - n
+        if complement in seen:
+            return [seen[complement], i]
+        seen[n] = i
+    return []
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>vector&lt;int&gt; twoSum(vector&lt;int&gt;&amp; nums, int target) {
+    unordered_map&lt;int, int&gt; seen;
+    for (int i = 0; i &lt; nums.size(); i++) {
+        int complement = target - nums[i];
+        if (seen.count(complement)) {
+            return {seen[complement], i};
+        }
+        seen[nums[i]] = i;
+    }
+    return {};
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public int[] twoSum(int[] nums, int target) {
+    Map&lt;Integer, Integer&gt; seen = new HashMap&lt;&gt;();
+    for (int i = 0; i &lt; nums.length; i++) {
+        int complement = target - nums[i];
+        if (seen.containsKey(complement)) {
+            return new int[] { seen.get(complement), i };
+        }
+        seen.put(nums[i], i);
+    }
+    return new int[] {};
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub">nums = [2, 5, 1, 8, 3, 9, 4, 7], target = 11</p>
+<div id="viz" class="viz-box"></div>
+<p id="status" class="sub"></p>
+<button id="play" class="btn">Play</button>
+
+<script>
+(function () {
+  const data = [2, 5, 1, 8, 3, 9, 4, 7];
+  const target = 11;
+  const box = document.getElementById("viz");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  function render(current, found, msg) {
+    box.innerHTML = "";
+    data.forEach((val, i) => {
+      const el = document.createElement("div");
+      el.className = "viz-item";
+      if (found && found.includes(i)) el.classList.add("found");
+      else if (i === current) el.classList.add("active");
+      el.textContent = val;
+      box.appendChild(el);
+    });
+    status.textContent = msg || "";
+  }
+
+  render(-1, null, "click play");
+
+  btn.addEventListener("click", () => {
+    btn.disabled = true;
+    let i = 0;
+    const seen = {};
+    const step = setInterval(() => {
+      if (i >= data.length) {
+        clearInterval(step);
+        btn.disabled = false;
+        return;
+      }
+      const complement = target - data[i];
+      if (complement in seen) {
+        render(i, [seen[complement], i], `found: indices ${seen[complement]} and ${i}  (${data[seen[complement]]} + ${data[i]} = ${target})`);
+        clearInterval(step);
+        btn.disabled = false;
+        return;
+      }
+      render(i, null, `checking index ${i} (value ${data[i]}) — need ${complement}`);
+      seen[data[i]] = i;
+      i++;
+    }, 700);
+  });
+})();
+</script>
+
+{% endblock %}

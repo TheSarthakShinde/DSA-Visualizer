@@ -1,0 +1,23 @@
+{% extends "problems/base.html" %}
+{% block title %}DSA Visualizer{% endblock %}
+{% block content %}
+<h1>DSA Problems</h1>
+<p class="sub">Pick a problem to see its solution + a visual walkthrough.</p>
+
+{% if grouped %}
+  {% for category, problems in grouped.items %}
+  <h2 class="cat-heading">{{ category }}</h2>
+  <div class="grid">
+    {% for p in problems %}
+    <a class="card" href="{% url 'detail' slug=p.slug %}">
+      <h3>{{ p.title }}</h3>
+      {% if p.difficulty %}<span class="badge {{ p.difficulty|lower }}">{{ p.difficulty }}</span>{% endif %}
+      {% if p.tags %}<p class="tags">{{ p.tags }}</p>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% endfor %}
+{% else %}
+<p>No problems yet. Add an .html file to <code>problems/templates/problems/</code> and it shows up here.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,328 @@
+<!-- difficulty: Easy | tags: array,hash-table | category: Arrays & Strings -->
+{% extends "problems/base.html" %}
+{% block title %}Contains Duplicate{% endblock %}
+{% block content %}
+
+<style>
+  /* Custom visualization styles only - core UI handled by site CSS */
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success {
+    background: #fce7f3;
+    border-left-color: #db2777;
+    color: #831843;
+  }
+  .status-panel.safe {
+    background: #dcfce7;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+
+  .viz-section-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #64748b;
+    margin-bottom: 12px;
+    font-weight: 700;
+  }
+  
+  .array-track {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 30px;
+  }
+
+  .array-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 54px;
+  }
+
+  .array-box {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #334155;
+    transition: all 0.3s ease;
+  }
+
+  .array-index {
+    margin-top: 6px;
+    font-size: 12px;
+    color: #94a3b8;
+  }
+
+  .array-box.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+  
+  .array-box.duplicate {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+    animation: shake 0.4s ease-in-out;
+  }
+
+  .hash-set-container {
+    background: #ffffff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 16px;
+    min-height: 80px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .hash-set-empty {
+    color: #94a3b8;
+    font-style: italic;
+    font-size: 14px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .set-element {
+    background: #f1f5f9;
+    border: 2px solid #94a3b8;
+    padding: 8px 16px;
+    border-radius: 24px;
+    font-size: 16px;
+    font-weight: bold;
+    color: #334155;
+    animation: popIn 0.3s ease-out;
+  }
+
+  .set-element.collision {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+  }
+
+  @keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0) translateY(-4px); }
+    25% { transform: translateX(-4px) translateY(-4px); }
+    75% { transform: translateX(4px) translateY(-4px); }
+  }
+</style>
+
+<h1>Contains Duplicate</h1>
+<p>Given an integer array <code>nums</code>, return <code>true</code> if any value appears at least twice in the array, and return <code>false</code> if every element is distinct.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def containsDuplicate(nums):
+    seen = set()
+    for n in nums:
+        if n in seen:
+            return True
+        seen.add(n)
+    return False
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>bool containsDuplicate(vector&lt;int&gt;&amp; nums) {
+    unordered_set&lt;int&gt; seen;
+    for (int n : nums) {
+        if (seen.count(n)) {
+            return true;
+        }
+        seen.insert(n);
+    }
+    return false;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public boolean containsDuplicate(int[] nums) {
+    Set&lt;Integer&gt; seen = new HashSet&lt;&gt;();
+    for (int n : nums) {
+        if (seen.contains(n)) {
+            return true;
+        }
+        seen.add(n);
+    }
+    return false;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>nums = [4, 1, 7, 3, 1, 5]</code></p>
+<div id="status" class="status-panel">Click Play to start the Hash Set algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div class="viz-section-title">Array (nums)</div>
+  <div id="array-viz" class="array-track"></div>
+  
+  <div class="viz-section-title">Hash Set (seen)</div>
+  <div id="set-viz" class="hash-set-container">
+    <div class="hash-set-empty">Set is empty { }</div>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const data = [4, 1, 7, 3, 1, 5];
+  const arrayBox = document.getElementById("array-viz");
+  const setBox = document.getElementById("set-viz");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  function renderArray(current, duplicateIndices) {
+    arrayBox.innerHTML = "";
+    data.forEach((val, i) => {
+      const item = document.createElement("div");
+      item.className = "array-item";
+      
+      const box = document.createElement("div");
+      box.className = "array-box";
+      box.textContent = val;
+      
+      if (duplicateIndices && duplicateIndices.includes(i)) {
+        box.classList.add("duplicate");
+      } else if (i === current) {
+        box.classList.add("active");
+      }
+      
+      const label = document.createElement("div");
+      label.className = "array-index";
+      label.textContent = `i=${i}`;
+      
+      item.appendChild(box);
+      item.appendChild(label);
+      arrayBox.appendChild(item);
+    });
+  }
+
+  function renderSet(seenArray, collisionVal) {
+    setBox.innerHTML = "";
+    if (seenArray.length === 0) {
+      setBox.innerHTML = '<div class="hash-set-empty">Set is empty { }</div>';
+      return;
+    }
+
+    seenArray.forEach(val => {
+      const el = document.createElement("div");
+      el.className = "set-element";
+      if (val === collisionVal) el.classList.add("collision");
+      el.textContent = val;
+      setBox.appendChild(el);
+    });
+  }
+
+  renderArray(-1, null);
+
+  btn.addEventListener("click", () => {
+    btn.disabled = true;
+    status.className = "status-panel"; 
+    
+    let i = 0;
+    const seenMap = {}; 
+    const seenOrder = []; 
+    
+    renderSet([], null);
+    
+    const step = setInterval(() => {
+      if (i >= data.length) {
+        clearInterval(step);
+        btn.disabled = false;
+        btn.textContent = "↻ Replay";
+        status.className = "status-panel safe";
+        status.innerHTML = `<strong>Finished!</strong> Reached end of array without duplicates.<br>Result: <strong>return False</strong>`;
+        renderArray(-1, null);
+        return;
+      }
+      
+      const currentVal = data[i];
+      
+      if (currentVal in seenMap) {
+        const firstIndex = seenMap[currentVal];
+        status.className = "status-panel success";
+        status.innerHTML = `<strong>Duplicate Found!</strong> Value <strong>${currentVal}</strong> is already in the Hash Set.<br>Result: <strong>return True</strong>`;
+        
+        renderArray(i, [firstIndex, i]);
+        renderSet(seenOrder, currentVal); 
+        
+        clearInterval(step);
+        btn.disabled = false;
+        btn.textContent = "↻ Replay";
+        return;
+      }
+      
+      status.innerHTML = `Checking index ${i} (value <strong>${currentVal}</strong>).<br>Not in Set. Adding <strong>${currentVal}</strong> to Set.`;
+      
+      renderArray(i, null);
+      
+      seenMap[currentVal] = i;
+      seenOrder.push(currentVal);
+      renderSet(seenOrder, null);
+      
+      i++;
+    }, 1200); 
+  });
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,366 @@
+<!-- difficulty: Easy | tags: two-pointers,string | category: Two Pointers -->
+{% extends "problems/base.html" %}
+{% block title %}Valid Palindrome{% endblock %}
+{% block content %}
+
+<style>
+  /* Custom visualization styles only - core UI handled by site CSS */
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success {
+    background: #dcfce7;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+  .status-panel.error {
+    background: #fef2f2;
+    border-left-color: #ef4444;
+    color: #991b1b;
+  }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .string-track {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .char-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .char-box {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 20px;
+    font-weight: bold;
+    font-family: monospace;
+    color: #334155;
+    transition: all 0.3s ease;
+  }
+
+  /* Pointer States */
+  .char-box.left-ptr {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+  
+  .char-box.right-ptr {
+    border-color: #a855f7;
+    background: #faf5ff;
+    color: #7e22ce;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+  }
+  
+  .char-box.both-ptr {
+    border-color: #06b6d4;
+    background: #ecfeff;
+    color: #0891b2;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2);
+  }
+
+  .char-box.match {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+  }
+
+  .char-box.mismatch {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+    animation: shake 0.4s ease-in-out;
+  }
+
+  .char-box.skip {
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+    color: #94a3b8;
+    opacity: 0.6;
+  }
+
+  .ptr-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 8px;
+    height: 20px;
+  }
+  .ptr-label.left { color: #3b82f6; }
+  .ptr-label.right { color: #a855f7; }
+  .ptr-label.both { color: #06b6d4; }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0) translateY(-4px); }
+    25% { transform: translateX(-4px) translateY(-4px); }
+    75% { transform: translateX(4px) translateY(-4px); }
+  }
+</style>
+
+<h1>Valid Palindrome</h1>
+<p>A phrase is a palindrome if, after converting all uppercase letters into lowercase letters and removing all non-alphanumeric characters, it reads the same forward and backward.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def isPalindrome(s: str) -> bool:
+    l, r = 0, len(s) - 1
+    
+    while l < r:
+        while l < r and not s[l].isalnum():
+            l += 1
+        while l < r and not s[r].isalnum():
+            r -= 1
+            
+        if s[l].lower() != s[r].lower():
+            return False
+            
+        l += 1
+        r -= 1
+        
+    return True
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>bool isPalindrome(string s) {
+    int l = 0, r = s.length() - 1;
+    
+    while (l < r) {
+        while (l < r && !isalnum(s[l])) l++;
+        while (l < r && !isalnum(s[r])) r--;
+        
+        if (tolower(s[l]) != tolower(s[r])) {
+            return false;
+        }
+        
+        l++; 
+        r--;
+    }
+    
+    return true;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public boolean isPalindrome(String s) {
+    int l = 0, r = s.length() - 1;
+    
+    while (l < r) {
+        while (l < r && !Character.isLetterOrDigit(s.charAt(l))) l++;
+        while (l < r && !Character.isLetterOrDigit(s.charAt(r))) r--;
+        
+        if (Character.toLowerCase(s.charAt(l)) != Character.toLowerCase(s.charAt(r))) {
+            return false;
+        }
+        
+        l++;
+        r--;
+    }
+    
+    return true;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>s = "Race car!"</code></p>
+<div id="status" class="status-panel">Click Play to start the Two Pointers algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div id="string-track" class="string-track"></div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const str = "Race car!";
+  const data = str.split("");
+  const track = document.getElementById("string-track");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  // Helper to check if alphanumeric
+  function isAlnum(char) {
+    return /^[a-z0-9]+$/i.test(char);
+  }
+
+  // Helper for delays
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  function render(l, r, matchedIndices = [], skippedIndices = [], isMismatch = false) {
+    track.innerHTML = "";
+    data.forEach((char, i) => {
+      const container = document.createElement("div");
+      container.className = "char-container";
+      
+      const box = document.createElement("div");
+      box.className = "char-box";
+      // Render spaces as actual visual spaces
+      box.innerHTML = char === ' ' ? '&nbsp;' : char;
+      
+      let labelText = "";
+      let labelClass = "";
+
+      if (skippedIndices.includes(i)) {
+        box.classList.add("skip");
+      } else if (matchedIndices.includes(i)) {
+        box.classList.add("match");
+      }
+
+      if (i === l && i === r) {
+        box.classList.add("both-ptr");
+        if (isMismatch) box.classList.add("mismatch");
+        labelText = "L/R";
+        labelClass = "both";
+      } else if (i === l) {
+        box.classList.add("left-ptr");
+        if (isMismatch) box.classList.add("mismatch");
+        labelText = "L";
+        labelClass = "left";
+      } else if (i === r) {
+        box.classList.add("right-ptr");
+        if (isMismatch) box.classList.add("mismatch");
+        labelText = "R";
+        labelClass = "right";
+      }
+
+      const label = document.createElement("div");
+      label.className = `ptr-label ${labelClass}`;
+      label.textContent = labelText;
+      
+      container.appendChild(box);
+      container.appendChild(label);
+      track.appendChild(container);
+    });
+  }
+
+  // Initial render
+  render(-1, -1);
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    
+    let l = 0;
+    let r = data.length - 1;
+    let matchedIndices = [];
+    let skippedIndices = [];
+    
+    render(l, r, matchedIndices, skippedIndices);
+
+    while (l < r) {
+      status.innerHTML = `Comparing pointers: L at index ${l}, R at index ${r}.`;
+      await delay(1200);
+
+      // Advance L if not alphanumeric
+      while (l < r && !isAlnum(data[l])) {
+        skippedIndices.push(l);
+        status.innerHTML = `Character '${data[l]}' is not alphanumeric. Moving L right.`;
+        l++;
+        render(l, r, matchedIndices, skippedIndices);
+        await delay(1000);
+      }
+
+      // Advance R if not alphanumeric
+      while (l < r && !isAlnum(data[r])) {
+        skippedIndices.push(r);
+        status.innerHTML = `Character '${data[r]}' is not alphanumeric. Moving R left.`;
+        r--;
+        render(l, r, matchedIndices, skippedIndices);
+        await delay(1000);
+      }
+
+      if (l >= r) break;
+
+      // Compare characters
+      let leftChar = data[l].toLowerCase();
+      let rightChar = data[r].toLowerCase();
+
+      status.innerHTML = `Comparing lowercase '${leftChar}' == '${rightChar}'...`;
+      await delay(1000);
+
+      if (leftChar !== rightChar) {
+        status.className = "status-panel error";
+        status.innerHTML = `<strong>Mismatch!</strong> '${leftChar}' != '${rightChar}'. String is not a palindrome.`;
+        render(l, r, matchedIndices, skippedIndices, true);
+        btn.disabled = false;
+        btn.textContent = "↻ Replay";
+        return;
+      } else {
+        status.innerHTML = `<strong>Match!</strong> Moving both pointers inward.`;
+        matchedIndices.push(l, r);
+        render(l, r, matchedIndices, skippedIndices);
+        await delay(1000);
+        l++;
+        r--;
+        render(l, r, matchedIndices, skippedIndices);
+      }
+    }
+
+    // Finished loop successfully
+    if (l === r) {
+      if (!isAlnum(data[l])) skippedIndices.push(l);
+      else matchedIndices.push(l);
+    }
+
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> Pointers crossed (L >= R). It is a valid palindrome!`;
+    render(-1, -1, matchedIndices, skippedIndices);
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+
+{% endblock %}
