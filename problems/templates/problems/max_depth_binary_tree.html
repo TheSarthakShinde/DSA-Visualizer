@@ -1,0 +1,310 @@
+<!-- difficulty: Easy | tags: tree,depth-first-search | category: Trees & Tries -->
+{% extends "problems/base.html" %}
+{% block title %}Maximum Depth of Binary Tree{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    position: relative;
+    height: 350px;
+  }
+
+  .tree-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .tree-edge {
+    stroke: #cbd5e1;
+    stroke-width: 3;
+    transition: stroke 0.3s;
+  }
+  .tree-edge.active { stroke: #3b82f6; stroke-width: 4; }
+  .tree-edge.done { stroke: #10b981; }
+
+  .tree-node {
+    position: absolute;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 3px solid #64748b;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #334155;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .tree-node.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+
+  .tree-node.done {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+  }
+
+  .depth-badge {
+    position: absolute;
+    bottom: -25px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e293b;
+    color: white;
+    font-size: 11px;
+    font-family: monospace;
+    padding: 2px 6px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+  }
+  .depth-badge.visible { opacity: 1; }
+
+  .null-node {
+    position: absolute;
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: bold;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .null-node.visible { opacity: 1; }
+</style>
+
+<h1>Maximum Depth of Binary Tree</h1>
+<p>Given the <code>root</code> of a binary tree, return its maximum depth. A binary tree's maximum depth is the number of nodes along the longest path from the root node down to the farthest leaf node.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def maxDepth(root: Optional[TreeNode]) -> int:
+    if not root:
+        return 0
+        
+    left_depth = maxDepth(root.left)
+    right_depth = maxDepth(root.right)
+    
+    return max(left_depth, right_depth) + 1
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>int maxDepth(TreeNode* root) {
+    if (root == nullptr) return 0;
+    
+    int left_depth = maxDepth(root->left);
+    int right_depth = maxDepth(root->right);
+    
+    return max(left_depth, right_depth) + 1;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public int maxDepth(TreeNode root) {
+    if (root == null) return 0;
+    
+    int leftDepth = maxDepth(root.left);
+    int rightDepth = maxDepth(root.right);
+    
+    return Math.max(leftDepth, rightDepth) + 1;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>root = [3, 9, 20, null, null, 15, 7]</code></p>
+<div id="status" class="status-panel">Click Play to evaluate max depth via Post-Order Traversal.</div>
+
+<div id="viz" class="viz-container">
+  <svg class="tree-svg" id="tree-svg"></svg>
+  <div id="tree-nodes"></div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const container = document.getElementById("viz");
+  const svg = document.getElementById("tree-svg");
+  const nodesDiv = document.getElementById("tree-nodes");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+  
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  
+  const treeData = [
+    { id: 0, val: 3, x: 50, y: 15 },
+    { id: 1, val: 9, x: 30, y: 45, pid: 0 },
+    { id: 2, val: 20, x: 70, y: 45, pid: 0 },
+    { id: 3, val: 15, x: 55, y: 75, pid: 2 },
+    { id: 4, val: 7, x: 85, y: 75, pid: 2 }
+  ];
+
+  function drawStaticTree() {
+    nodesDiv.innerHTML = "";
+    svg.innerHTML = "";
+    
+    treeData.forEach(n => {
+      // Edges
+      if (n.pid !== undefined) {
+        const parent = treeData.find(p => p.id === n.pid);
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("class", "tree-edge");
+        line.id = `edge-${n.id}`;
+        line.setAttribute("x1", `${parent.x}%`);
+        line.setAttribute("y1", `${parent.y}%`);
+        line.setAttribute("x2", `${n.x}%`);
+        line.setAttribute("y2", `${n.y}%`);
+        svg.appendChild(line);
+      }
+      
+      // Nodes
+      let el = document.createElement("div");
+      el.className = "tree-node";
+      el.id = `node-${n.id}`;
+      el.style.left = `${n.x}%`;
+      el.style.top = `${n.y}%`;
+      
+      let valEl = document.createElement("span");
+      valEl.textContent = n.val;
+      el.appendChild(valEl);
+      
+      let badge = document.createElement("div");
+      badge.className = "depth-badge";
+      badge.id = `badge-${n.id}`;
+      el.appendChild(badge);
+      
+      nodesDiv.appendChild(el);
+    });
+  }
+
+  async function getDepth(id, pId) {
+    const nodeData = treeData.find(n => n.id === id);
+    if (!nodeData) return 0;
+    
+    const el = document.getElementById(`node-${id}`);
+    const edge = document.getElementById(`edge-${id}`);
+    
+    if (edge) edge.classList.add("active");
+    el.classList.add("active");
+    status.innerHTML = `Visiting Node <strong>${nodeData.val}</strong>. Checking children...`;
+    await delay(1000);
+    
+    // Find children
+    const children = treeData.filter(n => n.pid === id);
+    let leftChild = children[0];
+    let rightChild = children[1];
+    
+    let leftDepth = 0;
+    if (leftChild) {
+      leftDepth = await getDepth(leftChild.id, id);
+    } else {
+      status.innerHTML = `Left child of <strong>${nodeData.val}</strong> is null. Depth = 0.`;
+      await delay(800);
+    }
+    
+    // Re-highlight current after returning from left
+    el.classList.add("active");
+    
+    let rightDepth = 0;
+    if (rightChild) {
+      rightDepth = await getDepth(rightChild.id, id);
+    } else {
+      status.innerHTML = `Right child of <strong>${nodeData.val}</strong> is null. Depth = 0.`;
+      await delay(800);
+    }
+    
+    // Re-highlight current after returning from right
+    el.classList.add("active");
+    
+    let myDepth = Math.max(leftDepth, rightDepth) + 1;
+    
+    status.className = "status-panel info";
+    status.innerHTML = `Node <strong>${nodeData.val}</strong> calculates depth: <code>max(${leftDepth}, ${rightDepth}) + 1 = ${myDepth}</code>.`;
+    
+    const badge = document.getElementById(`badge-${id}`);
+    badge.textContent = `Depth: ${myDepth}`;
+    badge.classList.add("visible");
+    
+    await delay(1500);
+    
+    el.classList.remove("active");
+    el.classList.add("done");
+    if (edge) {
+      edge.classList.remove("active");
+      edge.classList.add("done");
+    }
+    
+    return myDepth;
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    drawStaticTree();
+    
+    await delay(500);
+    let maxD = await getDepth(0, null);
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> Root node evaluated a maximum depth of <strong>${maxD}</strong>.`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+  
+  drawStaticTree();
+})();
+</script>
+{% endblock %}
