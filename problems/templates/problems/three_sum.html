@@ -1,0 +1,445 @@
+<!-- difficulty: Medium | tags: array,two-pointers,sorting | category: Two Pointers -->
+{% extends "problems/base.html" %}
+{% block title %}3Sum{% endblock %}
+{% block content %}
+
+<style>
+  /* Custom visualization styles only - core UI handled by site CSS */
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+  }
+  .status-panel.success {
+    background: #dcfce7;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+  .status-panel.info {
+    background: #fef9c3;
+    border-left-color: #eab308;
+    color: #713f12;
+  }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+  }
+  
+  .array-track {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .elem-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .elem-box {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 18px;
+    font-weight: bold;
+    font-family: monospace;
+    color: #334155;
+    transition: all 0.3s ease;
+  }
+
+  /* Pointer States */
+  .elem-box.ptr-i {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+  }
+  
+  .elem-box.ptr-left {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  }
+  
+  .elem-box.ptr-right {
+    border-color: #a855f7;
+    background: #faf5ff;
+    color: #7e22ce;
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(168, 85, 247, 0.2);
+  }
+
+  .elem-box.match {
+    border-color: #10b981 !important;
+    background: #ecfdf5 !important;
+    color: #047857 !important;
+    animation: pop 0.4s ease-out;
+  }
+
+  .elem-box.skip {
+    border-color: #e2e8f0;
+    background: #f1f5f9;
+    color: #94a3b8;
+    opacity: 0.5;
+  }
+
+  .ptr-label {
+    font-size: 14px;
+    font-weight: bold;
+    margin-top: 8px;
+    height: 20px;
+  }
+  .ptr-label.i { color: #f59e0b; }
+  .ptr-label.left { color: #3b82f6; }
+  .ptr-label.right { color: #a855f7; }
+
+  .results-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #fff;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+  }
+  .results-title {
+    font-size: 13px;
+    text-transform: uppercase;
+    font-weight: bold;
+    color: #64748b;
+    margin-bottom: 10px;
+  }
+  .triplet-tag {
+    display: inline-block;
+    padding: 6px 12px;
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    color: #047857;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: bold;
+    margin: 0 8px 8px 0;
+    animation: pop 0.3s ease-out;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  
+  .calculation-box {
+    text-align: center;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    margin: 15px 0;
+    color: #1e293b;
+    height: 28px;
+  }
+</style>
+
+<h1>3Sum</h1>
+<p>Given an integer array nums, return all the triplets <code>[nums[i], nums[j], nums[k]]</code> such that <code>i != j</code>, <code>i != k</code>, and <code>j != k</code>, and <code>nums[i] + nums[j] + nums[k] == 0</code>. Notice that the solution set must not contain duplicate triplets.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def threeSum(nums):
+    res = []
+    nums.sort()
+    
+    for i in range(len(nums)):
+        # Skip duplicate 'i'
+        if i > 0 and nums[i] == nums[i-1]:
+            continue
+            
+        l, r = i + 1, len(nums) - 1
+        while l < r:
+            three_sum = nums[i] + nums[l] + nums[r]
+            
+            if three_sum > 0:
+                r -= 1
+            elif three_sum < 0:
+                l += 1
+            else:
+                res.append([nums[i], nums[l], nums[r]])
+                l += 1
+                r -= 1
+                # Skip duplicates for 'l'
+                while l < r and nums[l] == nums[l-1]:
+                    l += 1
+                    
+    return res
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>vector&lt;vector&lt;int&gt;&gt; threeSum(vector&lt;int&gt;&amp; nums) {
+    vector&lt;vector&lt;int&gt;&gt; res;
+    sort(nums.begin(), nums.end());
+    
+    for (int i = 0; i < nums.size(); i++) {
+        if (i > 0 && nums[i] == nums[i-1]) continue;
+        
+        int l = i + 1, r = nums.size() - 1;
+        while (l < r) {
+            int sum = nums[i] + nums[l] + nums[r];
+            if (sum > 0) {
+                r--;
+            } else if (sum < 0) {
+                l++;
+            } else {
+                res.push_back({nums[i], nums[l], nums[r]});
+                l++;
+                r--;
+                while (l < r && nums[l] == nums[l-1]) l++;
+            }
+        }
+    }
+    return res;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public List&lt;List&lt;Integer&gt;&gt; threeSum(int[] nums) {
+    List&lt;List&lt;Integer&gt;&gt; res = new ArrayList&lt;&gt;();
+    Arrays.sort(nums);
+    
+    for (int i = 0; i < nums.length; i++) {
+        if (i > 0 && nums[i] == nums[i-1]) continue;
+        
+        int l = i + 1;
+        int r = nums.length - 1;
+        while (l < r) {
+            int sum = nums[i] + nums[l] + nums[r];
+            if (sum > 0) {
+                r--;
+            } else if (sum < 0) {
+                l++;
+            } else {
+                res.add(Arrays.asList(nums[i], nums[l], nums[r]));
+                l++;
+                r--;
+                while (l < r && nums[l] == nums[l-1]) l++;
+            }
+        }
+    }
+    return res;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>nums = [-1, 0, 1, 2, -1, -4]</code></p>
+<div id="status" class="status-panel">Click Play to start the algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div id="calc-box" class="calculation-box"></div>
+  <div id="array-track" class="array-track"></div>
+  <div class="results-container">
+    <div class="results-title">Triplets Found (Sum = 0)</div>
+    <div id="results-box"><em>None yet</em></div>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const initialData = [-1, 0, 1, 2, -1, -4];
+  let data = [...initialData];
+  const track = document.getElementById("array-track");
+  const status = document.getElementById("status");
+  const calcBox = document.getElementById("calc-box");
+  const resultsBox = document.getElementById("results-box");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  function render(iPtr, leftPtr, rightPtr, matchIndices = [], skipIndices = []) {
+    track.innerHTML = "";
+    data.forEach((val, index) => {
+      const container = document.createElement("div");
+      container.className = "elem-container";
+      
+      const box = document.createElement("div");
+      box.className = "elem-box";
+      box.textContent = val;
+      
+      let labelText = "";
+      let labelClass = "";
+
+      if (skipIndices.includes(index)) {
+        box.classList.add("skip");
+      }
+      if (matchIndices.includes(index)) {
+        box.classList.add("match");
+      }
+
+      if (index === iPtr) {
+        box.classList.add("ptr-i");
+        labelText = "i";
+        labelClass = "i";
+      } else if (index === leftPtr) {
+        box.classList.add("ptr-left");
+        labelText = "L";
+        labelClass = "left";
+      } else if (index === rightPtr) {
+        box.classList.add("ptr-right");
+        labelText = "R";
+        labelClass = "right";
+      }
+
+      const label = document.createElement("div");
+      label.className = `ptr-label ${labelClass}`;
+      label.textContent = labelText;
+      
+      container.appendChild(box);
+      container.appendChild(label);
+      track.appendChild(container);
+    });
+  }
+
+  function renderCalculation(iPtr, leftPtr, rightPtr) {
+    if (iPtr === -1 || leftPtr === -1 || rightPtr === -1) {
+      calcBox.innerHTML = "";
+      return;
+    }
+    const sum = data[iPtr] + data[leftPtr] + data[rightPtr];
+    let color = sum === 0 ? "#10b981" : (sum < 0 ? "#3b82f6" : "#ef4444");
+    calcBox.innerHTML = `nums[i] + nums[L] + nums[R] = (${data[iPtr]}) + (${data[leftPtr]}) + (${data[rightPtr]}) = <span style="color:${color}">${sum}</span>`;
+  }
+
+  render(-1, -1, -1);
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    calcBox.innerHTML = "";
+    resultsBox.innerHTML = "";
+    let foundTriplets = [];
+    
+    // Reset Data
+    data = [...initialData];
+    render(-1, -1, -1);
+    
+    // Step 1: Sort
+    status.innerHTML = "<strong>Step 1:</strong> Sort the array first.";
+    await delay(1000);
+    data.sort((a, b) => a - b);
+    render(-1, -1, -1);
+    status.innerHTML = `Array sorted: [${data.join(", ")}]`;
+    await delay(1200);
+
+    // Step 2: Iterate
+    for (let i = 0; i < data.length - 2; i++) {
+      // Skip duplicates for i
+      if (i > 0 && data[i] === data[i - 1]) {
+        status.innerHTML = `nums[i] (${data[i]}) is same as previous. Skipping to avoid duplicate triplets.`;
+        render(i, -1, -1, [], Array.from({length: i+1}, (_, idx) => idx));
+        await delay(1200);
+        continue;
+      }
+
+      let l = i + 1;
+      let r = data.length - 1;
+      
+      while (l < r) {
+        render(i, l, r);
+        renderCalculation(i, l, r);
+        let currentSum = data[i] + data[l] + data[r];
+        
+        status.innerHTML = `Fixed <strong>i=${i}</strong>. Checking <strong>L=${l}, R=${r}</strong>. Sum is ${currentSum}.`;
+        await delay(1200);
+
+        if (currentSum === 0) {
+          status.className = "status-panel success";
+          status.innerHTML = `<strong>Match found!</strong> Sum is 0. Saving triplet [${data[i]}, ${data[l]}, ${data[r]}].`;
+          render(i, l, r, [i, l, r]);
+          
+          if (foundTriplets.length === 0) resultsBox.innerHTML = "";
+          foundTriplets.push([data[i], data[l], data[r]]);
+          
+          const tag = document.createElement("span");
+          tag.className = "triplet-tag";
+          tag.textContent = `[${data[i]}, ${data[l]}, ${data[r]}]`;
+          resultsBox.appendChild(tag);
+
+          await delay(1500);
+          status.className = "status-panel";
+          
+          l++;
+          r--;
+          
+          // Skip duplicates for l
+          while (l < r && data[l] === data[l - 1]) {
+            status.innerHTML = `Skipping duplicate L pointer value (${data[l]}).`;
+            render(i, l, r);
+            await delay(800);
+            l++;
+          }
+        } else if (currentSum < 0) {
+          status.className = "status-panel info";
+          status.innerHTML = `Sum is < 0 (${currentSum}). We need a larger sum, so <strong>increment L</strong>.`;
+          await delay(1200);
+          status.className = "status-panel";
+          l++;
+        } else {
+          status.className = "status-panel info";
+          status.innerHTML = `Sum is > 0 (${currentSum}). We need a smaller sum, so <strong>decrement R</strong>.`;
+          await delay(1200);
+          status.className = "status-panel";
+          r--;
+        }
+      }
+    }
+
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Algorithm Complete!</strong> Total unique triplets found: ${foundTriplets.length}.`;
+    calcBox.innerHTML = "";
+    render(-1, -1, -1);
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+
+{% endblock %}
