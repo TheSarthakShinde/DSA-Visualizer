@@ -1,0 +1,391 @@
+<!-- difficulty: Medium | tags: array,two-pointers | category: Two Pointers -->
+{% extends "problems/base.html" %}
+{% block title %}Container With Most Water{% endblock %}
+{% block content %}
+
+<style>
+  /* Custom visualization styles only - core UI handled by site CSS */
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s ease;
+  }
+  .status-panel.success {
+    background: #dcfce7;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+  .status-panel.info {
+    background: #fef9c3;
+    border-left-color: #eab308;
+    color: #713f12;
+  }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px 24px 40px 24px;
+    margin-bottom: 20px;
+  }
+  
+  .stats-bar {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    font-family: monospace;
+    font-size: 16px;
+  }
+  
+  .stat-box {
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-weight: bold;
+    color: #334155;
+  }
+  .stat-box.highlight {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+    animation: pop 0.4s ease-out;
+  }
+
+  .chart-container {
+    position: relative;
+    height: 250px;
+    width: 100%;
+    border-bottom: 3px solid #94a3b8;
+    border-left: 3px solid #94a3b8;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding-top: 20px;
+  }
+
+  .line-wrapper {
+    position: relative;
+    height: 100%;
+    width: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    z-index: 2;
+  }
+
+  .line-bar {
+    width: 6px;
+    background-color: #94a3b8;
+    border-radius: 4px 4px 0 0;
+    transition: all 0.3s ease;
+  }
+  
+  .line-val {
+    position: absolute;
+    top: -25px;
+    font-size: 13px;
+    font-weight: bold;
+    color: #64748b;
+  }
+
+  .line-idx {
+    position: absolute;
+    bottom: -25px;
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: monospace;
+  }
+
+  /* Pointer States */
+  .line-wrapper.ptr-left .line-bar {
+    background-color: #3b82f6;
+    width: 10px;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+  }
+  .line-wrapper.ptr-left .line-val { color: #1d4ed8; font-size: 15px; }
+  .line-wrapper.ptr-left .line-idx { color: #3b82f6; font-weight: bold; }
+  
+  .line-wrapper.ptr-right .line-bar {
+    background-color: #a855f7;
+    width: 10px;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+  }
+  .line-wrapper.ptr-right .line-val { color: #7e22ce; font-size: 15px; }
+  .line-wrapper.ptr-right .line-idx { color: #a855f7; font-weight: bold; }
+
+  /* Water Visualization */
+  .water-overlay {
+    position: absolute;
+    bottom: 0;
+    background: rgba(14, 165, 233, 0.25);
+    border-top: 3px dashed #0ea5e9;
+    transition: all 0.5s ease-in-out;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+  }
+  .water-overlay.active {
+    opacity: 1;
+  }
+  
+  .water-text {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-weight: bold;
+    color: #0369a1;
+    font-family: monospace;
+    font-size: 14px;
+    border: 1px solid #7dd3fc;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.9); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+</style>
+
+<h1>Container With Most Water</h1>
+<p>You are given an integer array <code>height</code> of length <code>n</code>. There are <code>n</code> vertical lines drawn such that the two endpoints of the <code>i<sup>th</sup></code> line are <code>(i, 0)</code> and <code>(i, height[i])</code>.</p>
+<p>Find two lines that together with the x-axis form a container, such that the container contains the most water. Return the maximum amount of water a container can store.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def maxArea(height: List[int]) -> int:
+    l, r = 0, len(height) - 1
+    max_area = 0
+    
+    while l < r:
+        area = min(height[l], height[r]) * (r - l)
+        max_area = max(max_area, area)
+        
+        if height[l] < height[r]:
+            l += 1
+        else:
+            r -= 1
+            
+    return max_area
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>int maxArea(vector&lt;int&gt;&amp; height) {
+    int l = 0;
+    int r = height.size() - 1;
+    int max_area = 0;
+    
+    while (l < r) {
+        int area = min(height[l], height[r]) * (r - l);
+        max_area = max(max_area, area);
+        
+        if (height[l] < height[r]) {
+            l++;
+        } else {
+            r--;
+        }
+    }
+    
+    return max_area;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public int maxArea(int[] height) {
+    int l = 0;
+    int r = height.length - 1;
+    int maxArea = 0;
+    
+    while (l < r) {
+        int area = Math.min(height[l], height[r]) * (r - l);
+        maxArea = Math.max(maxArea, area);
+        
+        if (height[l] < height[r]) {
+            l++;
+        } else {
+            r--;
+        }
+    }
+    
+    return maxArea;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>height = [1, 8, 6, 2, 5, 4, 8, 3, 7]</code></p>
+
+<div id="viz" class="viz-container">
+  <div class="stats-bar">
+    <div id="current-calc" class="stat-box">Current Area: 0</div>
+    <div id="max-area-box" class="stat-box">Max Area: 0</div>
+  </div>
+  
+  <div id="status" class="status-panel">Click Play to start the Two Pointers algorithm.</div>
+  
+  <div id="chart-viz" class="chart-container">
+    <div id="water-viz" class="water-overlay">
+      <div id="water-text" class="water-text"></div>
+    </div>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const data = [1, 8, 6, 2, 5, 4, 8, 3, 7];
+  const maxVal = Math.max(...data);
+  const chartBox = document.getElementById("chart-viz");
+  const waterBox = document.getElementById("water-viz");
+  const waterText = document.getElementById("water-text");
+  const status = document.getElementById("status");
+  const currentCalcBox = document.getElementById("current-calc");
+  const maxAreaBox = document.getElementById("max-area-box");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  // Initialize bars
+  const lineWrappers = [];
+  data.forEach((val, i) => {
+    const wrapper = document.createElement("div");
+    wrapper.className = "line-wrapper";
+    
+    const valLabel = document.createElement("div");
+    valLabel.className = "line-val";
+    valLabel.textContent = val;
+
+    const bar = document.createElement("div");
+    bar.className = "line-bar";
+    bar.style.height = `${(val / maxVal) * 100}%`;
+
+    const idxLabel = document.createElement("div");
+    idxLabel.className = "line-idx";
+    idxLabel.textContent = i;
+
+    wrapper.appendChild(valLabel);
+    wrapper.appendChild(bar);
+    wrapper.appendChild(idxLabel);
+    chartBox.appendChild(wrapper);
+    lineWrappers.push(wrapper);
+  });
+
+  function render(l, r, maxArea, currentArea, isNewMax) {
+    // Reset all pointers
+    lineWrappers.forEach((w, i) => {
+      w.classList.remove("ptr-left", "ptr-right");
+      if (i === l) w.classList.add("ptr-left");
+      if (i === r) w.classList.add("ptr-right");
+    });
+
+    if (l !== -1 && r !== -1) {
+      const w = r - l;
+      const h = Math.min(data[l], data[r]);
+      
+      // Calculate CSS percentages for water block
+      // The chart uses flex with space-between. Left offset is exactly l / (len - 1)
+      const leftPercent = (l / (data.length - 1)) * 100;
+      const widthPercent = (w / (data.length - 1)) * 100;
+      const heightPercent = (h / maxVal) * 100;
+      
+      waterBox.style.left = `calc(${leftPercent}% + 5px)`; // slight offset for bar width center
+      waterBox.style.width = `calc(${widthPercent}% - 10px)`;
+      waterBox.style.height = `${heightPercent}%`;
+      waterBox.classList.add("active");
+      
+      waterText.innerHTML = `${w} &times; ${h} = <strong>${currentArea}</strong>`;
+      
+      currentCalcBox.innerHTML = `Current Area: min(${data[l]}, ${data[r]}) &times; ${w} = ${currentArea}`;
+    } else {
+      waterBox.classList.remove("active");
+      currentCalcBox.innerHTML = `Current Area: 0`;
+    }
+    
+    maxAreaBox.innerHTML = `Max Area: ${maxArea}`;
+    if (isNewMax) {
+      maxAreaBox.classList.remove("highlight");
+      void maxAreaBox.offsetWidth; // trigger reflow
+      maxAreaBox.classList.add("highlight");
+    }
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    maxAreaBox.classList.remove("highlight");
+    
+    let l = 0;
+    let r = data.length - 1;
+    let maxArea = 0;
+    
+    while (l < r) {
+      let currentArea = Math.min(data[l], data[r]) * (r - l);
+      let isNewMax = currentArea > maxArea;
+      if (isNewMax) maxArea = currentArea;
+      
+      render(l, r, maxArea, currentArea, isNewMax);
+      
+      if (isNewMax) {
+        status.className = "status-panel success";
+        status.innerHTML = `<strong>New Max Area found!</strong> Area = ${currentArea}.`;
+      } else {
+        status.className = "status-panel";
+        status.innerHTML = `Area is ${currentArea}. Max remains ${maxArea}.`;
+      }
+      
+      await delay(1800); // Wait so user can read
+
+      if (data[l] < data[r]) {
+        status.className = "status-panel info";
+        status.innerHTML = `Left line (height ${data[l]}) < Right line (height ${data[r]}).<br>To find a potentially larger area, we must move the <strong>shorter</strong> line. Moving Left pointer right (L++).`;
+        await delay(2000);
+        l++;
+      } else {
+        status.className = "status-panel info";
+        status.innerHTML = `Right line (height ${data[r]}) &le; Left line (height ${data[l]}).<br>To find a potentially larger area, we must move the <strong>shorter</strong> line. Moving Right pointer left (R--).`;
+        await delay(2000);
+        r--;
+      }
+    }
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Algorithm Complete!</strong> Pointers met. The maximum area is <strong>${maxArea}</strong>.`;
+    render(-1, -1, maxArea, 0, false);
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+
+{% endblock %}
