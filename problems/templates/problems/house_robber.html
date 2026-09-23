@@ -1,0 +1,388 @@
+<!-- difficulty: Medium | tags: array,dynamic-programming | category: Dynamic Programming -->
+{% extends "problems/base.html" %}
+{% block title %}House Robber{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: auto;
+  }
+  
+  .equation-box {
+    font-size: 16px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #334155;
+    background: white;
+    padding: 12px 24px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    margin-bottom: 30px;
+    text-align: center;
+    min-height: 70px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .equation-box .highlight-skip { color: #3b82f6; }
+  .equation-box .highlight-rob { color: #a855f7; }
+
+  .street-wrapper {
+    display: flex;
+    gap: 15px;
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .house-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 60px;
+  }
+
+  .house-block {
+    width: 50px;
+    height: 50px;
+    background: #cbd5e1;
+    border: 2px solid #94a3b8;
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 18px;
+    color: #334155;
+    transition: all 0.4s ease;
+  }
+  /* Roof triangle using pseudo-element */
+  .house-block::before {
+    content: '';
+    position: absolute;
+    top: -22px;
+    left: -2px;
+    border-left: 25px solid transparent;
+    border-right: 25px solid transparent;
+    border-bottom: 20px solid #94a3b8;
+    transition: all 0.4s ease;
+  }
+
+  .dp-box {
+    width: 100%;
+    height: 35px;
+    background: white;
+    border: 2px solid #cbd5e1;
+    border-radius: 4px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-family: monospace;
+    font-size: 16px;
+    color: #94a3b8;
+    transition: all 0.4s ease;
+  }
+  
+  .house-index {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: bold;
+    font-family: monospace;
+  }
+
+  /* Animation States */
+  .house-block.active {
+    background: #fef08a;
+    border-color: #eab308;
+    color: #854d0e;
+    transform: scale(1.1);
+    box-shadow: 0 4px 10px rgba(234, 179, 8, 0.4);
+    z-index: 10;
+  }
+  .house-block.active::before { border-bottom-color: #eab308; }
+
+  .house-block.robbed {
+    background: #dcfce7;
+    border-color: #22c55e;
+    color: #16a34a;
+  }
+  .house-block.robbed::before { border-bottom-color: #22c55e; }
+
+  .house-block.skipped {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    color: #94a3b8;
+    opacity: 0.6;
+  }
+
+  .dp-box.known {
+    color: #334155;
+    border-color: #64748b;
+  }
+  
+  .dp-box.calc-skip { border-color: #3b82f6; background: #eff6ff; color: #1d4ed8; }
+  .dp-box.calc-rob { border-color: #a855f7; background: #faf5ff; color: #7e22ce; }
+  
+  .dp-box.updated {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+    animation: pop 0.4s ease-out;
+  }
+
+  @keyframes pop {
+    0% { transform: scale(0.8); }
+    70% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+</style>
+
+<h1>House Robber</h1>
+<p>You are a professional robber planning to rob houses along a street. Each house has a certain amount of money stashed, the only constraint stopping you from robbing each of them is that adjacent houses have security systems connected and <strong>it will automatically contact the police if two adjacent houses were broken into on the same night</strong>.</p>
+<p>Given an integer array <code>nums</code> representing the amount of money of each house, return the maximum amount of money you can rob tonight without alerting the police.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def rob(nums: List[int]) -> int:
+    if not nums: return 0
+    if len(nums) == 1: return nums[0]
+    
+    # We only need the last two max values
+    prev2 = 0
+    prev1 = 0
+    
+    for money in nums:
+        temp = prev1
+        prev1 = max(prev1, prev2 + money)
+        prev2 = temp
+        
+    return prev1
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>int rob(vector&lt;int&gt;&amp; nums) {
+    if (nums.empty()) return 0;
+    if (nums.size() == 1) return nums[0];
+    
+    int prev2 = 0;
+    int prev1 = 0;
+    
+    for (int money : nums) {
+        int temp = prev1;
+        prev1 = max(prev1, prev2 + money);
+        prev2 = temp;
+    }
+    
+    return prev1;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public int rob(int[] nums) {
+    if (nums == null || nums.length == 0) return 0;
+    if (nums.length == 1) return nums[0];
+    
+    int prev2 = 0;
+    int prev1 = 0;
+    
+    for (int money : nums) {
+        int temp = prev1;
+        prev1 = Math.max(prev1, prev2 + money);
+        prev2 = temp;
+    }
+    
+    return prev1;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>nums = [2, 7, 9, 3, 1]</code></p>
+<div id="status" class="status-panel">Click Play to start the DP tabulation.</div>
+
+<div id="viz" class="viz-container">
+  <div class="equation-box" id="eq-box">
+    <div>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</div>
+    <div style="font-size: 14px; color: #64748b; margin-top: 5px;">(Skip vs. Rob)</div>
+  </div>
+  <div class="street-wrapper" id="street-viz"></div>
+</div>
+
+<button id="play" class="btn">▶ Play DP Animation</button>
+
+<script>
+(function () {
+  const nums = [2, 7, 9, 3, 1];
+  const n = nums.length;
+  const streetBox = document.getElementById("street-viz");
+  const eqBox = document.getElementById("eq-box");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  let dp = new Array(n).fill(0);
+
+  function initUI() {
+    streetBox.innerHTML = "";
+    eqBox.innerHTML = `<div>dp[i] = max(dp[i-1], dp[i-2] + nums[i])</div><div style="font-size: 14px; color: #64748b; margin-top: 5px;">(Skip vs. Rob)</div>`;
+    
+    for (let i = 0; i < n; i++) {
+      const col = document.createElement("div");
+      col.className = "house-column";
+      
+      const house = document.createElement("div");
+      house.className = "house-block";
+      house.id = `house-${i}`;
+      house.innerHTML = `<span>$${nums[i]}</span>`;
+      
+      const dpBox = document.createElement("div");
+      dpBox.className = "dp-box";
+      dpBox.id = `dp-${i}`;
+      dpBox.textContent = "-";
+      
+      const label = document.createElement("div");
+      label.className = "house-index";
+      label.textContent = `i=${i}`;
+      
+      col.appendChild(house);
+      col.appendChild(dpBox);
+      col.appendChild(label);
+      streetBox.appendChild(col);
+    }
+  }
+
+  initUI();
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    initUI();
+    
+    // Base Case 0
+    status.innerHTML = `<strong>Base Case (i=0):</strong> Only one house available. We rob it.`;
+    dp[0] = nums[0];
+    const h0 = document.getElementById("house-0");
+    const dp0 = document.getElementById("dp-0");
+    h0.classList.add("robbed");
+    dp0.textContent = dp[0];
+    dp0.classList.add("known");
+    await delay(1500);
+    
+    // Base Case 1
+    if (n > 1) {
+      status.innerHTML = `<strong>Base Case (i=1):</strong> Two houses available. We rob the one with more money.`;
+      dp[1] = Math.max(nums[0], nums[1]);
+      const h1 = document.getElementById("house-1");
+      const dp1 = document.getElementById("dp-1");
+      
+      if (nums[1] > nums[0]) {
+        h1.classList.add("robbed");
+        h0.classList.replace("robbed", "skipped");
+      } else {
+        h1.classList.add("skipped");
+      }
+      
+      dp1.textContent = dp[1];
+      dp1.classList.add("known");
+      await delay(1500);
+    }
+    
+    // DP Loop
+    for (let i = 2; i < n; i++) {
+      const hCurr = document.getElementById(`house-${i}`);
+      const dpCurr = document.getElementById(`dp-${i}`);
+      const dpM1 = document.getElementById(`dp-${i-1}`);
+      const dpM2 = document.getElementById(`dp-${i-2}`);
+      
+      hCurr.classList.add("active");
+      dpM1.classList.add("calc-skip");
+      dpM2.classList.add("calc-rob");
+      
+      let skipVal = dp[i-1];
+      let robVal = dp[i-2] + nums[i];
+      
+      status.className = "status-panel info";
+      status.innerHTML = `Calculating <strong>House ${i}</strong>. Compare skipping (take max from i-1) vs. robbing (take max from i-2 + current).`;
+      
+      eqBox.innerHTML = `
+        <div>dp[${i}] = max(<span class="highlight-skip">dp[${i-1}]</span>, <span class="highlight-rob">dp[${i-2}]</span> + nums[${i}])</div>
+        <div style="font-family: monospace; font-size: 18px; margin-top: 10px;">
+          max(<span class="highlight-skip">${skipVal}</span>, <span class="highlight-rob">${dp[i-2]}</span> + ${nums[i]}) &rarr; max(${skipVal}, ${robVal})
+        </div>
+      `;
+      
+      await delay(2500);
+      
+      dp[i] = Math.max(skipVal, robVal);
+      dpCurr.textContent = dp[i];
+      dpCurr.classList.add("updated");
+      
+      if (robVal > skipVal) {
+        hCurr.classList.replace("active", "robbed");
+        status.innerHTML = `Robbing is better (${robVal} > ${skipVal}). We rob House ${i}.`;
+      } else {
+        hCurr.classList.replace("active", "skipped");
+        status.innerHTML = `Skipping is better (${skipVal} &ge; ${robVal}). We skip House ${i}.`;
+      }
+      
+      await delay(1500);
+      
+      dpM1.classList.remove("calc-skip");
+      dpM2.classList.remove("calc-rob");
+      dpCurr.classList.replace("updated", "known");
+    }
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> The maximum amount of money we can rob without triggering alarms is <strong>$${dp[n-1]}</strong>.`;
+    eqBox.innerHTML = `<div>Max Profit = $${dp[n-1]}</div>`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
