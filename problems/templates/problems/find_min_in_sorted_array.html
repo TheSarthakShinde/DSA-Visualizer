@@ -1,0 +1,288 @@
+<!-- difficulty: Medium | tags: array,binary-search | category: Binary Search -->
+{% extends "problems/base.html" %}
+{% block title %}Find Minimum in Rotated Sorted Array{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 50px 20px 40px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .array-track {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .array-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+  }
+
+  .array-box {
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: white;
+    border: 2px solid #94a3b8;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: monospace;
+    color: #334155;
+    transition: all 0.4s ease;
+  }
+
+  .idx-label {
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: monospace;
+  }
+
+  /* Pointer Flags */
+  .ptr-flag {
+    position: absolute;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    font-family: monospace;
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.4, Here are the templates for the Binary Search problems focusing on search space reduction. 
+
+Before diving into the code, here is a conceptual visualization of the binary search structure and how space reduction works:
+
+<Carousel>
+  <Image src="image_agent_tag_6758746894934885192" alt="Diagram showing the branching tree-like structure of binary search algorithm paths" caption="Binary Search Algorithm Concept" />
+  <Image src="image_agent_tag_6758746894934886402" alt="A rotated dial representing how a sorted array's indices shift cyclically when rotated" caption="Rotated Array Concept" />
+  <Image src="image_agent_tag_6758746894934884959" alt="Graph showing a curve hitting a distinct minimum point, conceptually similar to finding the drop in a rotated array" caption="Finding the Minimum" />
+</Carousel>
+
+Below are the individual HTML templates for each problem, complete with Python, C++, and Java solutions, as well as an interactive algorithm visualization script for each.
+
+### 1. Binary Search
+```html
+{% extends "problems/base.html" %}
+
+{% block content %}
+<div class="problem-container">
+    <div class="problem-header">
+        <h1>Binary Search</h1>
+        <div class="tags">
+            <span class="difficulty easy">Easy</span>
+            <span class="tag">Array</span>
+            <span class="tag">Binary Search</span>
+        </div>
+    </div>
+
+    <div class="problem-description">
+        <p>Given an array of integers <code>nums</code> which is sorted in ascending order, and an integer <code>target</code>, write a function to search <code>target</code> in <code>nums</code>. If <code>target</code> exists, then return its index. Otherwise, return <code>-1</code>.</p>
+        <p>You must write an algorithm with <code>O(log n)</code> runtime complexity.</p>
+    </div>
+
+    <div class="visualization-section">
+        <h3>Algorithm Visualization</h3>
+        <div id="viz"></div>
+        <button id="playBtn" class="btn btn-primary">Play Animation</button>
+    </div>
+    
+    <style>
+        #viz {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin: 20px 0;
+            min-height: 100px;
+            font-family: monospace;
+        }
+        .array-cell {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #ccc;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .pointer {
+            position: absolute;
+            bottom: -25px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        .highlight-mid { background-color: #ffeaa7; border-color: #fdcb6e; }
+        .highlight-target { background-color: #55efc4; border-color: #00b894; color: white; }
+        .discarded { opacity: 0.3; }
+    </style>
+
+    <div class="solution-section">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('python')">Python</button>
+            <button class="tab-btn" onclick="showTab('cpp')">C++</button>
+            <button class="tab-btn" onclick="showTab('java')">Java</button>
+        </div>
+
+        <div id="python" class="tab-panel active">
+<pre><code class="language-python">class Solution:
+    def search(self, nums: List[int], target: int) -> int:
+        left, right = 0, len(nums) - 1
+        
+        while left <= right:
+            mid = left + (right - left) // 2
+            
+            if nums[mid] == target:
+                return mid
+            elif nums[mid] < target:
+                left = mid + 1
+            else:
+                right = mid - 1
+                
+        return -1</code></pre>
+        </div>
+
+        <div id="cpp" class="tab-panel">
+<pre><code class="language-cpp">class Solution {
+public:
+    int search(vector&lt;int&gt;&amp; nums, int target) {
+        int left = 0;
+        int right = nums.size() - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return -1;
+    }
+};</code></pre>
+        </div>
+
+        <div id="java" class="tab-panel">
+<pre><code class="language-java">class Solution {
+    public int search(int[] nums, int target) {
+        int left = 0;
+        int right = nums.length - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (nums[mid] == target) {
+                return mid;
+            } else if (nums[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return -1;
+    }
+}</code></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+    }
+
+    const arr = [-1, 0, 3, 5, 9, 12];
+    const target = 9;
+    const viz = document.getElementById('viz');
+    
+    function renderArray(left, right, mid, found) {
+        viz.innerHTML = '';
+        arr.forEach((val, i) => {
+            const cell = document.createElement('div');
+            cell.className = 'array-cell';
+            if (i < left || i > right) cell.classList.add('discarded');
+            if (i === mid && !found) cell.classList.add('highlight-mid');
+            if (i === mid && found) cell.classList.add('highlight-target');
+            
+            cell.innerText = val;
+            
+            let pointers = [];
+            if (i === left) pointers.push('L');
+            if (i === right) pointers.push('R');
+            if (i === mid) pointers.push('M');
+            
+            if (pointers.length > 0 && !cell.classList.contains('discarded')) {
+                const p = document.createElement('div');
+                p.className = 'pointer';
+                p.innerText = pointers.join(',');
+                if (found) p.style.color = '#00b894';
+                cell.appendChild(p);
+            }
+            viz.appendChild(cell);
+        });
+    }
+
+    document.getElementById('playBtn').addEventListener('click', async () => {
+        let l = 0, r = arr.length - 1;
+        renderArray(l, r, -1, false);
+        
+        while (l <= r) {
+            await new Promise(res => setTimeout(res, 1000));
+            let m = Math.floor((l + r) / 2);
+            renderArray(l, r, m, false);
+            
+            await new Promise(res => setTimeout(res, 1500));
+            if (arr[m] === target) {
+                renderArray(l, r, m, true);
+                break;
+            } else if (arr[m] < target) {
+                l = m + 1;
+            } else {
+                r = m - 1;
+            }
+            renderArray(l, r, -1, false);
+        }
+    });
+
+    renderArray(0, arr.length - 1, -1, false);
+</script>
+{% endblock %}
