@@ -1,0 +1,368 @@
+<!-- difficulty: Medium | tags: hash-table,depth-first-search,breadth-first-search,graph | category: Graphs -->
+{% extends "problems/base.html" %}
+{% block title %}Clone Graph{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+  }
+
+  .graph-pane {
+    flex: 1;
+    background: white;
+    border: 2px dashed #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    height: 250px;
+    max-width: 300px;
+  }
+
+  .pane-title {
+    position: absolute;
+    top: 10px; left: 15px;
+    font-size: 13px;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #64748b;
+    z-index: 10;
+  }
+
+  .graph-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  .graph-edge {
+    stroke: #cbd5e1;
+    stroke-width: 4;
+    transition: all 0.3s ease;
+  }
+  .graph-edge.active { stroke: #3b82f6; stroke-width: 5; }
+  .graph-edge.cloned { stroke: #10b981; }
+
+  .graph-node {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 3px solid #64748b;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    color: #334155;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    transition: all 0.3s ease;
+  }
+  
+  .graph-node.active {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    color: #1d4ed8;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+    transform: translate(-50%, -50%) scale(1.15);
+  }
+  
+  .graph-node.visited {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    color: #b45309;
+  }
+
+  .graph-node.cloned {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+    animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes popIn {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+  }
+</style>
+
+<h1>Clone Graph</h1>
+<p>Given a reference of a node in a connected undirected graph, return a deep copy (clone) of the graph.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def cloneGraph(node: Optional['Node']) -> Optional['Node']:
+    if not node: return None
+    
+    clones = {node.val: Node(node.val, [])}
+    queue = deque([node])
+    
+    while queue:
+        curr = queue.popleft()
+        
+        for neighbor in curr.neighbors:
+            if neighbor.val not in clones:
+                clones[neighbor.val] = Node(neighbor.val, [])
+                queue.append(neighbor)
+                
+            clones[curr.val].neighbors.append(clones[neighbor.val])
+            
+    return clones[node.val]
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>Node* cloneGraph(Node* node) {
+    if (!node) return NULL;
+    
+    unordered_map&lt;Node*, Node*&gt; clones;
+    clones[node] = new Node(node->val);
+    queue&lt;Node*&gt; q;
+    q.push(node);
+    
+    while (!q.empty()) {
+        Node* curr = q.front();
+        q.pop();
+        
+        for (Node* neighbor : curr->neighbors) {
+            if (clones.find(neighbor) == clones.end()) {
+                clones[neighbor] = new Node(neighbor->val);
+                q.push(neighbor);
+            }
+            clones[curr]->neighbors.push_back(clones[neighbor]);
+        }
+    }
+    return clones[node];
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public Node cloneGraph(Node node) {
+    if (node == null) return null;
+    
+    Map&lt;Node, Node&gt; map = new HashMap&lt;&gt;();
+    map.put(node, new Node(node.val));
+    Queue&lt;Node&gt; queue = new LinkedList&lt;&gt;();
+    queue.add(node);
+    
+    while (!queue.isEmpty()) {
+        Node curr = queue.poll();
+        
+        for (Node neighbor : curr.neighbors) {
+            if (!map.containsKey(neighbor)) {
+                map.put(neighbor, new Node(neighbor.val));
+                queue.add(neighbor);
+            }
+            map.get(curr).neighbors.add(map.get(neighbor));
+        }
+    }
+    return map.get(node);
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<div id="status" class="status-panel">Click Play to start the BFS clone algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div class="graph-pane" id="pane-orig">
+    <div class="pane-title">Original Graph</div>
+    <svg class="graph-svg" id="svg-orig"></svg>
+  </div>
+  
+  <div class="graph-pane" id="pane-clone">
+    <div class="pane-title">Deep Copy (Hash Map)</div>
+    <svg class="graph-svg" id="svg-clone"></svg>
+  </div>
+</div>
+
+<button id="play" class="btn">▶ Play BFS Animation</button>
+
+<script>
+(function () {
+  const nodes = [
+    { id: 1, x: 25, y: 35 },
+    { id: 2, x: 75, y: 35 },
+    { id: 3, x: 75, y: 75 },
+    { id: 4, x: 25, y: 75 }
+  ];
+  
+  const edges = [
+    [1, 2], [2, 3], [3, 4], [4, 1]
+  ];
+
+  const svgOrig = document.getElementById("svg-orig");
+  const svgClone = document.getElementById("svg-clone");
+  const paneOrig = document.getElementById("pane-orig");
+  const paneClone = document.getElementById("pane-clone");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  function drawEdge(svg, a, b, idPrefix, className) {
+    const n1 = nodes.find(n => n.id === a);
+    const n2 = nodes.find(n => n.id === b);
+    let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("class", className);
+    line.id = `${idPrefix}-edge-${a}-${b}`;
+    line.setAttribute("x1", `${n1.x}%`);
+    line.setAttribute("y1", `${n1.y}%`);
+    line.setAttribute("x2", `${n2.x}%`);
+    line.setAttribute("y2", `${n2.y}%`);
+    svg.appendChild(line);
+  }
+
+  function initUI() {
+    svgOrig.innerHTML = "";
+    svgClone.innerHTML = "";
+    paneOrig.querySelectorAll('.graph-node').forEach(e => e.remove());
+    paneClone.querySelectorAll('.graph-node').forEach(e => e.remove());
+    
+    // Draw original edges
+    edges.forEach(e => {
+      drawEdge(svgOrig, e[0], e[1], "orig", "graph-edge");
+    });
+    
+    // Draw original nodes
+    nodes.forEach(n => {
+      let el = document.createElement("div");
+      el.className = "graph-node";
+      el.id = `orig-node-${n.id}`;
+      el.style.left = `${n.x}%`;
+      el.style.top = `${n.y}%`;
+      el.textContent = n.id;
+      paneOrig.appendChild(el);
+    });
+  }
+
+  initUI();
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    initUI();
+    
+    let visited = {};
+    let queue = [1];
+    
+    // Create first clone
+    status.innerHTML = `Starting BFS at Node <strong>1</strong>. Creating deep copy in Hash Map.`;
+    visited[1] = true;
+    
+    let clone1 = document.createElement("div");
+    clone1.className = "graph-node cloned";
+    clone1.id = `clone-node-1`;
+    clone1.style.left = `${nodes[0].x}%`;
+    clone1.style.top = `${nodes[0].y}%`;
+    clone1.textContent = "1'";
+    paneClone.appendChild(clone1);
+    
+    await delay(1200);
+    
+    while(queue.length > 0) {
+      let curr = queue.shift();
+      let currEl = document.getElementById(`orig-node-${curr}`);
+      currEl.classList.add("active");
+      
+      status.innerHTML = `Processing Node <strong>${curr}</strong>. Checking its neighbors...`;
+      await delay(1000);
+      
+      // Get neighbors
+      let currNeighbors = edges.filter(e => e[0] === curr || e[1] === curr)
+                               .map(e => e[0] === curr ? e[1] : e[0]);
+                               
+      for (let n of currNeighbors) {
+        // Highlight edge being checked
+        let edgeId = `orig-edge-${Math.min(curr, n)}-${Math.max(curr, n)}`;
+        let edgeEl = document.getElementById(edgeId);
+        if (edgeEl) edgeEl.classList.add("active");
+        
+        if (!visited[n]) {
+          status.className = "status-panel info";
+          status.innerHTML = `Neighbor <strong>${n}</strong> not visited. Cloning Node <strong>${n}</strong> and adding to Queue.`;
+          visited[n] = true;
+          queue.push(n);
+          
+          let cloneN = document.createElement("div");
+          cloneN.className = "graph-node cloned";
+          cloneN.id = `clone-node-${n}`;
+          let nodeData = nodes.find(nd => nd.id === n);
+          cloneN.style.left = `${nodeData.x}%`;
+          cloneN.style.top = `${nodeData.y}%`;
+          cloneN.textContent = `${n}'`;
+          paneClone.appendChild(cloneN);
+          
+          await delay(1200);
+        } else {
+          status.className = "status-panel";
+          status.innerHTML = `Neighbor <strong>${n}</strong> already cloned.`;
+          await delay(800);
+        }
+        
+        // Clone the edge if not already cloned
+        let cloneEdgeId = `clone-edge-${Math.min(curr, n)}-${Math.max(curr, n)}`;
+        if (!document.getElementById(cloneEdgeId)) {
+          status.innerHTML = `Cloning edge between <strong>${curr}'</strong> and <strong>${n}'</strong>.`;
+          drawEdge(svgClone, curr, n, "clone", "graph-edge cloned");
+        }
+        
+        if (edgeEl) edgeEl.classList.remove("active");
+        await delay(800);
+      }
+      
+      currEl.classList.replace("active", "visited");
+    }
+    
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> Graph successfully deep copied. Return the clone of the starting node.`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
