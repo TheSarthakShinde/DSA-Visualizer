@@ -1,0 +1,1228 @@
+{% extends "problems/base.html" %}
+{% block title %}Encode and Decode Strings{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+
+  .status-panel.success {
+    background: #dcfce7;
+    border-left-color: #16a34a;
+    color: #14532d;
+  }
+
+  .status-panel.info {
+    background: #fef9c3;
+    border-left-color: #eab308;
+    color: #713f12;
+  }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-x: auto;
+  }
+
+  .section-box {
+    width: 100%;
+    max-width: 950px;
+    background: white;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-sizing: border-box;
+  }
+
+  .section-title {
+    font-size: 18px;
+    font-weight: bold;
+    font-family: monospace;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+
+  .string-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    min-height: 45px;
+  }
+
+  .string-item {
+    background: #fef3c7;
+    border: 2px solid #f59e0b;
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: monospace;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+
+  .string-item.active {
+    background: #f43f5e;
+    border-color: #e11d48;
+    color: white;
+    transform: scale(1.08);
+    box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3);
+  }
+
+  .string-item.decoded {
+    background: #dcfce7;
+    border-color: #16a34a;
+    color: #14532d;
+  }
+
+  .encoded-box {
+    background: #0f172a;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 18px;
+    font-family: monospace;
+    font-size: 17px;
+    line-height: 1.7;
+    word-break: break-all;
+    min-height: 55px;
+    transition: all 0.3s ease;
+  }
+
+  .encoded-part {
+    display: inline-block;
+    padding: 3px 5px;
+    border-radius: 4px;
+    margin: 2px;
+  }
+
+  .length-part {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .delimiter-part {
+    background: #bae6fd;
+    color: #075985;
+  }
+
+  .value-part {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .pointer-box {
+    font-family: monospace;
+    background: white;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    padding: 12px 20px;
+    margin-top: 15px;
+    font-size: 16px;
+  }
+
+  .pointer-box span {
+    font-weight: bold;
+    color: #0284c7;
+  }
+
+  .formula {
+    background: white;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-family: monospace;
+  }
+
+  .explanation {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 18px;
+    margin: 20px 0;
+  }
+
+  .explanation h3 {
+    margin-top: 0;
+  }
+
+  .counter-box {
+    font-size: 20px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #334155;
+    background: white;
+    padding: 10px 24px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .counter-box span {
+    color: #10b981;
+    font-size: 26px;
+  }
+
+  .step-box {
+    background: #f1f5f9;
+    border-radius: 6px;
+    padding: 12px;
+    margin-top: 10px;
+    font-family: monospace;
+  }
+</style>
+
+
+<h1>Encode and Decode Strings</h1>
+
+<p>
+  Given a list of strings, encode the list into a single string and then
+  decode that string back into the original list of strings.
+</p>
+
+<p>
+  The important requirement is that the original strings must be recovered
+  <strong>exactly</strong>, even if they contain spaces, numbers, or special
+  characters.
+</p>
+
+
+<h2>Solution</h2>
+
+<div class="tabs">
+
+  <button class="tab-btn active" data-tab="py">
+    Python
+  </button>
+
+  <button class="tab-btn" data-tab="cpp">
+    C++
+  </button>
+
+  <button class="tab-btn" data-tab="java">
+    Java
+  </button>
+
+</div>
+
+
+<!-- ==================== PYTHON ==================== -->
+
+<div class="tab-panel" id="tab-py">
+
+<pre><code>class Solution:
+
+    def encode(self, strs: list[str]) -&gt; str:
+
+        encoded = ""
+
+        for s in strs:
+            encoded += str(len(s)) + "#" + s
+
+        return encoded
+
+
+    def decode(self, s: str) -&gt; list[str]:
+
+        result = []
+
+        i = 0
+
+        while i &lt; len(s):
+
+            j = i
+
+            while s[j] != "#":
+                j += 1
+
+            length = int(s[i:j])
+
+            start = j + 1
+
+            end = start + length
+
+            result.append(s[start:end])
+
+            i = end
+
+        return result
+</code></pre>
+
+</div>
+
+
+<!-- ==================== C++ ==================== -->
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+
+<pre><code>class Solution {
+public:
+
+    string encode(vector&lt;string&gt;&amp; strs) {
+
+        string encoded = "";
+
+        for (string s : strs) {
+
+            encoded += to_string(s.length());
+            encoded += "#";
+            encoded += s;
+        }
+
+        return encoded;
+    }
+
+
+    vector&lt;string&gt; decode(string s) {
+
+        vector&lt;string&gt; result;
+
+        int i = 0;
+
+        while (i &lt; s.length()) {
+
+            int j = i;
+
+            while (s[j] != '#') {
+                j++;
+            }
+
+            int length =
+                stoi(s.substr(i, j - i));
+
+            int start = j + 1;
+
+            int end = start + length;
+
+            result.push_back(
+                s.substr(start, length)
+            );
+
+            i = end;
+        }
+
+        return result;
+    }
+};
+</code></pre>
+
+</div>
+
+
+<!-- ==================== JAVA ==================== -->
+
+<div class="tab-panel" id="tab-java" style="display:none">
+
+<pre><code>class Solution {
+
+    public String encode(List&lt;String&gt; strs) {
+
+        StringBuilder encoded =
+            new StringBuilder();
+
+        for (String s : strs) {
+
+            encoded
+                .append(s.length())
+                .append("#")
+                .append(s);
+        }
+
+        return encoded.toString();
+    }
+
+
+    public List&lt;String&gt; decode(String s) {
+
+        List&lt;String&gt; result =
+            new ArrayList&lt;&gt;();
+
+        int i = 0;
+
+        while (i &lt; s.length()) {
+
+            int j = i;
+
+            while (s.charAt(j) != '#') {
+                j++;
+            }
+
+            int length = Integer.parseInt(
+                s.substring(i, j)
+            );
+
+            int start = j + 1;
+
+            int end = start + length;
+
+            result.add(
+                s.substring(start, end)
+            );
+
+            i = end;
+        }
+
+        return result;
+    }
+}
+</code></pre>
+
+</div>
+
+
+<!-- ==================== EXPLANATION ==================== -->
+
+<h2>How It Works</h2>
+
+<div class="explanation">
+
+  <h3>Encoding</h3>
+
+  <p>
+    For every string, store:
+  </p>
+
+  <div class="formula">
+    length + "#" + string
+  </div>
+
+  <p>
+    For example:
+  </p>
+
+  <div class="formula">
+    ["hello", "world"]
+  </div>
+
+  <p>becomes:</p>
+
+  <div class="formula">
+    5#hello5#world
+  </div>
+
+
+  <h3>Decoding</h3>
+
+  <p>
+    During decoding, first find <code>#</code>.
+    Everything before <code>#</code> represents the length of the string.
+  </p>
+
+  <div class="formula">
+    5#hello
+  </div>
+
+  <p>
+    Here:
+  </p>
+
+  <ul>
+    <li><code>5</code> → length</li>
+    <li><code>#</code> → separator</li>
+    <li><code>hello</code> → actual string</li>
+  </ul>
+
+  <p>
+    Therefore we know exactly how many characters to read after
+    <code>#</code>.
+  </p>
+
+</div>
+
+
+<!-- ==================== IMPORTANT IDEA ==================== -->
+
+<h2>Why Store the Length?</h2>
+
+<div class="explanation">
+
+  <p>
+    We cannot simply join strings using a normal separator because the
+    separator might already appear inside a string.
+  </p>
+
+  <p>For example:</p>
+
+  <div class="formula">
+    ["hello#world", "abc"]
+  </div>
+
+  <p>
+    If we simply use <code>#</code> as a separator, decoding becomes
+    ambiguous.
+  </p>
+
+  <p>
+    With length encoding:
+  </p>
+
+  <div class="formula">
+    11#hello#world3#abc
+  </div>
+
+  <p>
+    The decoder knows that the first string has exactly
+    <strong>11 characters</strong>, so the <code>#</code> inside
+    <code>hello#world</code> causes no problem.
+  </p>
+
+</div>
+
+
+<!-- ==================== VISUALIZATION ==================== -->
+
+<h2>Visualization</h2>
+
+<div id="status" class="status-panel">
+  Click Play to visualize the encoding and decoding process.
+</div>
+
+
+<div class="viz-container">
+
+  <div class="counter-box">
+    Current Step:
+    <span id="step-count">0</span>
+  </div>
+
+
+  <!-- Original Strings -->
+
+  <div class="section-box">
+
+    <div class="section-title">
+      1. Original Strings
+    </div>
+
+    <div
+      class="string-list"
+      id="original-strings">
+    </div>
+
+  </div>
+
+
+  <!-- Encoded String -->
+
+  <div class="section-box">
+
+    <div class="section-title">
+      2. Encoded String
+    </div>
+
+    <div
+      class="encoded-box"
+      id="encoded-string">
+    </div>
+
+  </div>
+
+
+  <!-- Decoder -->
+
+  <div class="section-box">
+
+    <div class="section-title">
+      3. Decoding
+    </div>
+
+    <div
+      class="encoded-box"
+      id="decode-string">
+    </div>
+
+    <div class="pointer-box">
+
+      Decoder Pointer:
+      <span id="decode-pointer">0</span>
+
+      &nbsp;&nbsp;|&nbsp;&nbsp;
+
+      Current Length:
+      <span id="current-length">-</span>
+
+    </div>
+
+  </div>
+
+
+  <!-- Decoded Result -->
+
+  <div class="section-box">
+
+    <div class="section-title">
+      4. Decoded Strings
+    </div>
+
+    <div
+      class="string-list"
+      id="decoded-strings">
+    </div>
+
+  </div>
+
+</div>
+
+
+<button id="play" class="btn">
+  ▶ Play Encode & Decode Animation
+</button>
+
+
+<!-- ==================== JAVASCRIPT ==================== -->
+
+<script>
+
+document.querySelectorAll(".tab-btn").forEach(btn => {
+
+  btn.addEventListener("click", () => {
+
+    document
+      .querySelectorAll(".tab-btn")
+      .forEach(b =>
+        b.classList.remove("active")
+      );
+
+    document
+      .querySelectorAll(".tab-panel")
+      .forEach(p =>
+        p.style.display = "none"
+      );
+
+    btn.classList.add("active");
+
+    document.getElementById(
+      "tab-" + btn.dataset.tab
+    ).style.display = "block";
+
+  });
+
+});
+
+
+(function () {
+
+  /*
+   * Example input
+   */
+
+  const strings = [
+    "hello",
+    "world",
+    "hello#world",
+    "DSA"
+  ];
+
+
+  const status =
+    document.getElementById("status");
+
+  const originalBox =
+    document.getElementById(
+      "original-strings"
+    );
+
+  const encodedBox =
+    document.getElementById(
+      "encoded-string"
+    );
+
+  const decodeBox =
+    document.getElementById(
+      "decode-string"
+    );
+
+  const decodedBox =
+    document.getElementById(
+      "decoded-strings"
+    );
+
+  const stepCount =
+    document.getElementById(
+      "step-count"
+    );
+
+  const pointerBox =
+    document.getElementById(
+      "decode-pointer"
+    );
+
+  const currentLengthBox =
+    document.getElementById(
+      "current-length"
+    );
+
+  const btn =
+    document.getElementById("play");
+
+
+  const delay = ms =>
+    new Promise(
+      resolve => setTimeout(resolve, ms)
+    );
+
+
+  /*
+   * Create original string boxes
+   */
+
+  function drawOriginalStrings() {
+
+    originalBox.innerHTML = "";
+
+    strings.forEach((str, index) => {
+
+      const div =
+        document.createElement("div");
+
+      div.className = "string-item";
+
+      div.id =
+        `original-${index}`;
+
+      div.textContent =
+        `"${str}"`;
+
+      originalBox.appendChild(div);
+
+    });
+
+  }
+
+
+  /*
+   * Reset everything
+   */
+
+  function resetVisualization() {
+
+    drawOriginalStrings();
+
+    encodedBox.innerHTML =
+      "Waiting for encoding...";
+
+    decodeBox.innerHTML =
+      "Waiting for decoding...";
+
+    decodedBox.innerHTML = "";
+
+    stepCount.textContent = "0";
+
+    pointerBox.textContent = "0";
+
+    currentLengthBox.textContent = "-";
+
+    status.className =
+      "status-panel";
+
+    status.innerHTML =
+      "Click Play to visualize the encoding and decoding process.";
+
+  }
+
+
+  /*
+   * Add encoded part
+   */
+
+  function addEncodedPart(
+    type,
+    text
+  ) {
+
+    const span =
+      document.createElement("span");
+
+    span.className =
+      `encoded-part ${type}`;
+
+    span.textContent =
+      text;
+
+    encodedBox.appendChild(span);
+
+  }
+
+
+  /*
+   * Animation
+   */
+
+  async function animateAlgorithm() {
+
+    btn.disabled = true;
+
+    btn.textContent =
+      "⏳ Running...";
+
+    resetVisualization();
+
+
+    /*
+     * =========================
+     * ENCODING
+     * =========================
+     */
+
+    status.className =
+      "status-panel info";
+
+    status.innerHTML =
+      "<strong>Encoding started...</strong>";
+
+    await delay(800);
+
+
+    let encoded = "";
+
+
+    for (
+      let i = 0;
+      i < strings.length;
+      i++
+    ) {
+
+      const str = strings[i];
+
+      const length =
+        str.length;
+
+
+      stepCount.textContent =
+        i + 1;
+
+
+      /*
+       * Highlight current string
+       */
+
+      document
+        .querySelectorAll(".string-item")
+        .forEach(el =>
+          el.classList.remove("active")
+        );
+
+
+      document
+        .getElementById(
+          `original-${i}`
+        )
+        .classList.add("active");
+
+
+      status.className =
+        "status-panel info";
+
+      status.innerHTML =
+        `<strong>Encoding string ${i + 1}:</strong>
+         "${str}"`;
+
+      await delay(700);
+
+
+      /*
+       * Add length
+       */
+
+      addEncodedPart(
+        "length-part",
+        length
+      );
+
+
+      status.innerHTML =
+        `Store length:
+         <strong>${length}</strong>`;
+
+      await delay(500);
+
+
+      /*
+       * Add delimiter
+       */
+
+      addEncodedPart(
+        "delimiter-part",
+        "#"
+      );
+
+
+      await delay(400);
+
+
+      /*
+       * Add actual string
+       */
+
+      addEncodedPart(
+        "value-part",
+        str
+      );
+
+
+      encoded +=
+        length + "#" + str;
+
+
+      status.innerHTML =
+        `<strong>Encoded:</strong>
+         ${length}#${str}`;
+
+      await delay(800);
+
+    }
+
+
+    /*
+     * Encoding finished
+     */
+
+    document
+      .querySelectorAll(".string-item")
+      .forEach(el =>
+        el.classList.remove("active")
+      );
+
+
+    status.className =
+      "status-panel success";
+
+    status.innerHTML =
+      `<strong>Encoding complete!</strong>
+       Encoded string =
+       <strong>${encoded}</strong>`;
+
+
+    await delay(1200);
+
+
+    /*
+     * =========================
+     * DECODING
+     * =========================
+     */
+
+    status.className =
+      "status-panel info";
+
+    status.innerHTML =
+      "<strong>Decoding started...</strong>";
+
+
+    decodeBox.innerHTML = "";
+
+
+    for (
+      let i = 0;
+      i < encoded.length;
+      i++
+    ) {
+
+      const span =
+        document.createElement("span");
+
+      span.className =
+        "encoded-part value-part";
+
+      span.textContent =
+        encoded[i];
+
+      span.id =
+        `decode-char-${i}`;
+
+      decodeBox.appendChild(span);
+
+    }
+
+
+    await delay(1000);
+
+
+    let pointer = 0;
+
+    let decoded = [];
+
+
+    while (
+      pointer < encoded.length
+    ) {
+
+      stepCount.textContent =
+        decoded.length + 1;
+
+
+      pointerBox.textContent =
+        pointer;
+
+
+      /*
+       * Find #
+       */
+
+      let j = pointer;
+
+
+      while (
+        encoded[j] !== "#"
+      ) {
+
+        const char =
+          document.getElementById(
+            `decode-char-${j}`
+          );
+
+        if (char) {
+          char.className =
+            "encoded-part length-part";
+        }
+
+        j++;
+
+        await delay(150);
+
+      }
+
+
+      /*
+       * Extract length
+       */
+
+      const length =
+        parseInt(
+          encoded.substring(
+            pointer,
+            j
+          )
+        );
+
+
+      currentLengthBox.textContent =
+        length;
+
+
+      status.className =
+        "status-panel info";
+
+      status.innerHTML =
+        `<strong>Length found:</strong>
+         ${length} characters`;
+
+      await delay(700);
+
+
+      /*
+       * Starting position
+       */
+
+      const start =
+        j + 1;
+
+
+      const end =
+        start + length;
+
+
+      /*
+       * Highlight characters
+       */
+
+      for (
+        let k = start;
+        k < end;
+        k++
+      ) {
+
+        const char =
+          document.getElementById(
+            `decode-char-${k}`
+          );
+
+        if (char) {
+
+          char.className =
+            "encoded-part value-part";
+
+          char.style.transform =
+            "scale(1.15)";
+
+          await delay(100);
+
+        }
+
+      }
+
+
+      /*
+       * Extract string
+       */
+
+      const str =
+        encoded.substring(
+          start,
+          end
+        );
+
+
+      decoded.push(str);
+
+
+      /*
+       * Add decoded string
+       */
+
+      const result =
+        document.createElement("div");
+
+      result.className =
+        "string-item decoded";
+
+      result.textContent =
+        `"${str}"`;
+
+      decodedBox.appendChild(
+        result
+      );
+
+
+      status.className =
+        "status-panel info";
+
+      status.innerHTML =
+        `<strong>Decoded:</strong>
+         "${str}"`;
+
+      await delay(800);
+
+
+      /*
+       * Move pointer
+       */
+
+      pointer = end;
+
+      pointerBox.textContent =
+        pointer;
+
+      currentLengthBox.textContent =
+        "-";
+
+      await delay(400);
+
+    }
+
+
+    /*
+     * =========================
+     * FINISHED
+     * =========================
+     */
+
+    status.className =
+      "status-panel success";
+
+    status.innerHTML =
+      `<strong>Finished!</strong>
+       Successfully decoded all
+       <strong>${decoded.length}</strong>
+       strings.`;
+
+    stepCount.textContent =
+      decoded.length;
+
+
+    btn.disabled = false;
+
+    btn.textContent =
+      "↻ Replay";
+
+  }
+
+
+  /*
+   * Initial state
+   */
+
+  resetVisualization();
+
+
+  /*
+   * Button
+   */
+
+  btn.addEventListener(
+    "click",
+    animateAlgorithm
+  );
+
+})();
+
+</script>
+
+
+<!-- ==================== COMPLEXITY ==================== -->
+
+<h2>Complexity</h2>
+
+<div class="explanation">
+
+  <h3>Encoding</h3>
+
+  <p>
+    <strong>Time Complexity:</strong>
+    <code>O(n)</code>
+  </p>
+
+  <p>
+    Every character from the input strings is processed once.
+  </p>
+
+  <p>
+    <strong>Space Complexity:</strong>
+    <code>O(n)</code>
+  </p>
+
+  <p>
+    The encoded string requires space proportional to the total
+    number of characters.
+  </p>
+
+
+  <h3>Decoding</h3>
+
+  <p>
+    <strong>Time Complexity:</strong>
+    <code>O(n)</code>
+  </p>
+
+  <p>
+    Every character of the encoded string is processed once.
+  </p>
+
+  <p>
+    <strong>Space Complexity:</strong>
+    <code>O(n)</code>
+  </p>
+
+  <p>
+    The decoded strings require space proportional to the input size.
+  </p>
+
+</div>
+
+
+{% endblock %}
