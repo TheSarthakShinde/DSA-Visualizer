@@ -1,0 +1,369 @@
+<!-- difficulty: Medium | tags: array,two-pointers,dynamic-programming,stack | category: Arrays & Two Pointers -->
+{% extends "problems/base.html" %}
+{% block title %}Trapping Rain Water{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+  .status-panel.success { background: #dcfce7; border-left-color: #16a34a; color: #14532d; }
+  .status-panel.info { background: #fef9c3; border-left-color: #eab308; color: #713f12; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .counter-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .counter-box {
+    font-size: 16px;
+    font-family: monospace;
+    font-weight: bold;
+    color: #334155;
+    background: white;
+    padding: 10px 18px;
+    border: 2px dashed #94a3b8;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+  .counter-box span { color: #0284c7; font-size: 20px; }
+  .counter-box.water span { color: #0ea5e9; }
+  .counter-box.left span { color: #f43f5e; }
+  .counter-box.right span { color: #8b5cf6; }
+
+  .bars-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 6px;
+    padding: 10px;
+    background: #e2e8f0;
+    border-radius: 8px;
+    border: 2px solid #cbd5e1;
+    height: 220px;
+  }
+
+  .bar-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    width: 40px;
+    height: 100%;
+    position: relative;
+  }
+
+  .bar-stack {
+    display: flex;
+    flex-direction: column-reverse;
+    width: 100%;
+  }
+
+  .bar-water {
+    width: 100%;
+    background: #7dd3fc;
+    border-left: 2px solid #38bdf8;
+    border-right: 2px solid #38bdf8;
+    transition: all 0.3s ease;
+  }
+
+  .bar-land {
+    width: 100%;
+    background: #92400e;
+    border: 2px solid #78350f;
+    border-radius: 2px 2px 0 0;
+    transition: all 0.3s ease;
+  }
+
+  .bar-label {
+    font-family: monospace;
+    font-size: 12px;
+    color: #475569;
+    margin-top: 4px;
+    height: 16px;
+  }
+
+  .pointer-marker {
+    position: absolute;
+    top: -22px;
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 13px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: white;
+    transition: left 0.3s ease;
+  }
+  .pointer-left { background: #f43f5e; }
+  .pointer-right { background: #8b5cf6; }
+
+  .bar-column.active-left .bar-land,
+  .bar-column.active-left .bar-water { box-shadow: 0 0 0 3px #f43f5e; }
+  .bar-column.active-right .bar-land,
+  .bar-column.active-right .bar-water { box-shadow: 0 0 0 3px #8b5cf6; }
+</style>
+
+<h1>Trapping Rain Water</h1>
+<p>Given <code>n</code> non-negative integers representing an elevation map where the width of each bar is <code>1</code>, compute how much water it can trap after raining.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def trap(height: List[int]) -> int:
+    if not height:
+        return 0
+
+    left, right = 0, len(height) - 1
+    left_max, right_max = height[left], height[right]
+    water = 0
+
+    while left < right:
+        if left_max <= right_max:
+            left += 1
+            left_max = max(left_max, height[left])
+            water += left_max - height[left]
+        else:
+            right -= 1
+            right_max = max(right_max, height[right])
+            water += right_max - height[right]
+
+    return water
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>class Solution {
+public:
+    int trap(vector&lt;int&gt;&amp; height) {
+        if (height.empty()) return 0;
+
+        int left = 0, right = height.size() - 1;
+        int leftMax = height[left], rightMax = height[right];
+        int water = 0;
+
+        while (left < right) {
+            if (leftMax <= rightMax) {
+                left++;
+                leftMax = max(leftMax, height[left]);
+                water += leftMax - height[left];
+            } else {
+                right--;
+                rightMax = max(rightMax, height[right]);
+                water += rightMax - height[right];
+            }
+        }
+
+        return water;
+    }
+};
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>class Solution {
+    public int trap(int[] height) {
+        if (height.length == 0) return 0;
+
+        int left = 0, right = height.length - 1;
+        int leftMax = height[left], rightMax = height[right];
+        int water = 0;
+
+        while (left < right) {
+            if (leftMax <= rightMax) {
+                left++;
+                leftMax = Math.max(leftMax, height[left]);
+                water += leftMax - height[left];
+            } else {
+                right--;
+                rightMax = Math.max(rightMax, height[right]);
+                water += rightMax - height[right];
+            }
+        }
+
+        return water;
+    }
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<div id="status" class="status-panel">Click Play to run the two-pointer algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div class="counter-row">
+    <div class="counter-box left">Left: <span id="left-val">-</span></div>
+    <div class="counter-box right">Right: <span id="right-val">-</span></div>
+    <div class="counter-box water">Total Water: <span id="water-count">0</span></div>
+  </div>
+  <div id="bars-viz" class="bars-container"></div>
+</div>
+
+<button id="play" class="btn">▶ Play Two-Pointer Animation</button>
+
+<script>
+(function () {
+  const heights = [4, 2, 0, 3, 2, 5];
+  const n = heights.length;
+  const maxHeight = Math.max(...heights);
+  const unit = 24; // px per height unit
+
+  const barsBox = document.getElementById("bars-viz");
+  const status = document.getElementById("status");
+  const waterBox = document.getElementById("water-count");
+  const leftBox = document.getElementById("left-val");
+  const rightBox = document.getElementById("right-val");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+
+  function drawBars(waterLevels) {
+    barsBox.innerHTML = "";
+    for (let i = 0; i < n; i++) {
+      const col = document.createElement("div");
+      col.className = "bar-column";
+      col.id = `col-${i}`;
+
+      const stack = document.createElement("div");
+      stack.className = "bar-stack";
+
+      const land = document.createElement("div");
+      land.className = "bar-land";
+      land.style.height = `${heights[i] * unit}px`;
+      land.textContent = heights[i];
+      land.style.display = "flex";
+      land.style.alignItems = "flex-start";
+      land.style.justifyContent = "center";
+      land.style.color = "white";
+      land.style.fontFamily = "monospace";
+      land.style.fontSize = "12px";
+      land.style.paddingTop = "2px";
+
+      const waterAmt = Math.max(0, (waterLevels[i] || 0) - heights[i]);
+      const water = document.createElement("div");
+      water.className = "bar-water";
+      water.style.height = `${waterAmt * unit}px`;
+      water.id = `water-${i}`;
+
+      stack.appendChild(land);
+      stack.insertBefore(water, land);
+
+      const label = document.createElement("div");
+      label.className = "bar-label";
+      label.textContent = `i=${i}`;
+
+      col.appendChild(stack);
+      col.appendChild(label);
+      barsBox.appendChild(col);
+    }
+  }
+
+  function setPointers(left, right) {
+    document.querySelectorAll(".bar-column").forEach(c => {
+      c.classList.remove("active-left", "active-right");
+    });
+    const leftCol = document.getElementById(`col-${left}`);
+    const rightCol = document.getElementById(`col-${right}`);
+    if (leftCol) leftCol.classList.add("active-left");
+    if (rightCol && right !== left) rightCol.classList.add("active-right");
+    leftBox.textContent = left;
+    rightBox.textContent = right;
+  }
+
+  function updateWaterBar(i, amount) {
+    const el = document.getElementById(`water-${i}`);
+    if (el) el.style.height = `${amount * unit}px`;
+  }
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+
+    const waterLevels = new Array(n).fill(0);
+    drawBars(waterLevels);
+
+    let left = 0, right = n - 1;
+    let leftMax = heights[left], rightMax = heights[right];
+    let water = 0;
+
+    setPointers(left, right);
+    status.innerHTML = `Init: <code>left=0, right=${right}</code>, leftMax=${leftMax}, rightMax=${rightMax}`;
+    await delay(700);
+
+    while (left < right) {
+      if (leftMax <= rightMax) {
+        left++;
+        leftMax = Math.max(leftMax, heights[left]);
+        const added = leftMax - heights[left];
+        water += added;
+        waterLevels[left] = leftMax;
+        updateWaterBar(left, Math.max(0, leftMax - heights[left]));
+
+        setPointers(left, right);
+        status.className = "status-panel info";
+        status.innerHTML = `leftMax (${leftMax}) &le; rightMax (${rightMax}) &rarr; move <strong>left</strong> to ${left}. Trapped <strong>${added}</strong> unit(s) here.`;
+      } else {
+        right--;
+        rightMax = Math.max(rightMax, heights[right]);
+        const added = rightMax - heights[right];
+        water += added;
+        waterLevels[right] = rightMax;
+        updateWaterBar(right, Math.max(0, rightMax - heights[right]));
+
+        setPointers(left, right);
+        status.className = "status-panel info";
+        status.innerHTML = `rightMax (${rightMax}) &lt; leftMax (${leftMax}) &rarr; move <strong>right</strong> to ${right}. Trapped <strong>${added}</strong> unit(s) here.`;
+      }
+
+      waterBox.textContent = water;
+      await delay(800);
+    }
+
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Finished!</strong> Pointers met at <code>${left}</code>. Total water trapped: <strong>${water}</strong>.`;
+
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+
+  drawBars(new Array(n).fill(0));
+})();
+</script>
+{% endblock %}
