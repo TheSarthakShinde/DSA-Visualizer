@@ -1,0 +1,344 @@
+<!-- difficulty: Medium | tags: linked-list,two-pointers | category: Linked List -->
+{% extends "problems/base.html" %}
+{% block title %}Remove Nth Node From End of List{% endblock %}
+{% block content %}
+
+<style>
+  .status-panel {
+    background: #e0f2fe;
+    border-left: 4px solid #0284c7;
+    padding: 12px 16px;
+    border-radius: 0 4px 4px 0;
+    font-family: monospace;
+    font-size: 14px;
+    margin: 20px 0;
+    min-height: 48px;
+    color: #0c4a6e;
+    transition: all 0.3s;
+  }
+  .status-panel.error { background: #fef2f2; border-left-color: #ef4444; color: #991b1b; }
+  .status-panel.success { background: #fce7f3; border-left-color: #db2777; color: #831843; }
+
+  .viz-container {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 60px 20px 60px 20px;
+    margin-bottom: 20px;
+    position: relative;
+    min-height: 200px;
+    overflow: hidden;
+  }
+  
+  .list-track {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .list-node {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 45px;
+    height: 45px;
+    border: 2px solid #64748b;
+    border-radius: 50%;
+    background: white;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: bold;
+    color: #334155;
+    position: absolute;
+    z-index: 2;
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .list-node.dummy {
+    border-style: dashed;
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  .list-node.target {
+    border-color: #ef4444;
+    background: #fef2f2;
+    color: #b91c1c;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    transform: scale(1.1);
+  }
+
+  .list-node.done {
+    border-color: #10b981;
+    background: #ecfdf5;
+    color: #047857;
+  }
+
+  .arrow {
+    position: absolute;
+    color: #94a3b8;
+    font-weight: bold;
+    font-size: 20px;
+    z-index: 1;
+    transition: opacity 0.5s ease;
+  }
+
+  /* Pointers */
+  .ptr {
+    position: absolute;
+    font-size: 16px;
+    font-weight: bold;
+    font-family: monospace;
+    width: 45px;
+    text-align: center;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10;
+  }
+  .ptr-left { top: 70px; color: #db2777; }
+  .ptr-right { top: -30px; color: #0284c7; }
+</style>
+
+<h1>Remove Nth Node From End of List</h1>
+<p>Given the <code>head</code> of a linked list, remove the <code>n<sup>th</sup></code> node from the end of the list and return its head. We use a dummy node and a two-pointer approach to achieve this in one pass.</p>
+
+<h2>Solution</h2>
+<div class="tabs">
+  <button class="tab-btn active" data-tab="py">Python</button>
+  <button class="tab-btn" data-tab="cpp">C++</button>
+  <button class="tab-btn" data-tab="java">Java</button>
+</div>
+
+<div class="tab-panel" id="tab-py">
+<pre><code>def removeNthFromEnd(head: Optional[ListNode], n: int) -> Optional[ListNode]:
+    # Dummy node handles edge cases like deleting the head
+    dummy = ListNode(0, head)
+    left = dummy
+    right = head
+    
+    # Step 1: Move right pointer n steps ahead
+    for _ in range(n):
+        right = right.next
+        
+    # Step 2: Move both pointers until right reaches the end
+    while right:
+        left = left.next
+        right = right.next
+        
+    # Step 3: Delete the target node
+    left.next = left.next.next
+    
+    return dummy.next
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-cpp" style="display:none">
+<pre><code>ListNode* removeNthFromEnd(ListNode* head, int n) {
+    ListNode* dummy = new ListNode(0, head);
+    ListNode* left = dummy;
+    ListNode* right = head;
+    
+    // Step 1: Move right pointer n steps ahead
+    for (int i = 0; i < n; i++) {
+        right = right->next;
+    }
+    
+    // Step 2: Move both pointers
+    while (right != nullptr) {
+        left = left->next;
+        right = right->next;
+    }
+    
+    // Step 3: Delete the target node
+    ListNode* toDelete = left->next;
+    left->next = left->next->next;
+    delete toDelete;
+    
+    ListNode* newHead = dummy->next;
+    delete dummy;
+    return newHead;
+}
+</code></pre>
+</div>
+
+<div class="tab-panel" id="tab-java" style="display:none">
+<pre><code>public ListNode removeNthFromEnd(ListNode head, int n) {
+    ListNode dummy = new ListNode(0, head);
+    ListNode left = dummy;
+    ListNode right = head;
+    
+    // Step 1: Move right pointer n steps ahead
+    for (int i = 0; i < n; i++) {
+        right = right.next;
+    }
+    
+    // Step 2: Move both pointers
+    while (right != null) {
+        left = left.next;
+        right = right.next;
+    }
+    
+    // Step 3: Delete the target node
+    left.next = left.next.next;
+    
+    return dummy.next;
+}
+</code></pre>
+</div>
+
+<script>
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.style.display = "none");
+    btn.classList.add("active");
+    document.getElementById("tab-" + btn.dataset.tab).style.display = "block";
+  });
+});
+</script>
+
+<h2>Visualization</h2>
+<p class="sub"><code>head = [1, 2, 3, 4, 5]</code>, <code>n = 2</code> (We want to remove node 4)</p>
+<div id="status" class="status-panel">Click Play to start the two-pointer algorithm.</div>
+
+<div id="viz" class="viz-container">
+  <div id="list-track" class="list-track">
+    <!-- Built by JS -->
+  </div>
+  <div id="ptr-left" class="ptr ptr-left" style="opacity:0;">Left<br>⬆</div>
+  <div id="ptr-right" class="ptr ptr-right" style="opacity:0;">⬇<br>Right</div>
+</div>
+
+<button id="play" class="btn">▶ Play Animation</button>
+
+<script>
+(function () {
+  const vals = ["D", 1, 2, 3, 4, 5];
+  const n = 2;
+  
+  const track = document.getElementById("list-track");
+  const ptrLeft = document.getElementById("ptr-left");
+  const ptrRight = document.getElementById("ptr-right");
+  const status = document.getElementById("status");
+  const btn = document.getElementById("play");
+
+  const delay = ms => new Promise(res => setTimeout(res, ms));
+  let nodeEls = [];
+  let arrowEls = [];
+
+  function initUI() {
+    track.innerHTML = "";
+    nodeEls = [];
+    arrowEls = [];
+    
+    vals.forEach((v, i) => {
+      let node = document.createElement("div");
+      node.className = "list-node" + (v === "D" ? " dummy" : "");
+      node.textContent = v;
+      node.style.left = `${(i * 80) + 20}px`;
+      node.style.top = `20px`;
+      track.appendChild(node);
+      nodeEls.push(node);
+
+      if (i < vals.length - 1) {
+        let arr = document.createElement("div");
+        arr.className = "arrow";
+        arr.innerHTML = "&rarr;";
+        arr.style.left = `${(i * 80) + 70}px`;
+        arr.style.top = `30px`;
+        track.appendChild(arr);
+        arrowEls.push(arr);
+      }
+    });
+    
+    ptrLeft.style.opacity = "0";
+    ptrRight.style.opacity = "0";
+  }
+  
+  function movePtr(ptrEl, index) {
+    if (index >= vals.length) {
+      ptrEl.style.opacity = "0";
+      return;
+    }
+    ptrEl.style.opacity = "1";
+    ptrEl.style.left = `${(index * 80) + 20}px`;
+  }
+  
+  initUI();
+
+  btn.addEventListener("click", async () => {
+    btn.disabled = true;
+    status.className = "status-panel";
+    initUI();
+    await delay(500);
+    
+    // Step 0: Initial Setup
+    let leftIdx = 0; // Starts at Dummy
+    let rightIdx = 1; // Starts at Head
+    
+    movePtr(ptrLeft, leftIdx);
+    movePtr(ptrRight, rightIdx);
+    status.innerHTML = `<strong>Init:</strong> Set Left pointer at Dummy (D) and Right pointer at head (1).`;
+    await delay(2000);
+    
+    // Step 1: Move Right n times
+    status.innerHTML = `<strong>Step 1:</strong> Move Right pointer <code>n = 2</code> steps ahead to create a gap of 2.`;
+    for (let i = 0; i < n; i++) {
+      rightIdx++;
+      movePtr(ptrRight, rightIdx);
+      await delay(1000);
+    }
+    
+    // Step 2: Move Both until right goes out of bounds
+    status.innerHTML = `<strong>Step 2:</strong> Move both pointers one step at a time until Right reaches the end (null).`;
+    await delay(2000);
+    
+    while (rightIdx <= vals.length) {
+      if (rightIdx === vals.length) {
+        movePtr(ptrRight, rightIdx); // moves offscreen/hides
+        break;
+      }
+      leftIdx++;
+      rightIdx++;
+      
+      movePtr(ptrLeft, leftIdx);
+      movePtr(ptrRight, rightIdx);
+      await delay(1200);
+    }
+    
+    // Step 3: Delete Target
+    const targetIdx = leftIdx + 1; // Node 4
+    status.innerHTML = `<strong>Step 3:</strong> Right is null. Left is right before the target. Highlight node ${vals[targetIdx]} for deletion.`;
+    nodeEls[targetIdx].classList.add("target");
+    await delay(2500);
+    
+    // Animate removal
+    status.innerHTML = `<strong>Delete:</strong> <code>left.next = left.next.next</code>. Bypassing node ${vals[targetIdx]}.`;
+    
+    // Drop the target node down and fade it out
+    nodeEls[targetIdx].style.top = `100px`;
+    nodeEls[targetIdx].style.opacity = `0`;
+    
+    // Hide the arrow coming out of the target node
+    if (arrowEls[targetIdx]) arrowEls[targetIdx].style.opacity = `0`;
+    
+    await delay(1000);
+    
+    // Shift all subsequent nodes left to close the visual gap
+    for (let i = targetIdx + 1; i < vals.length; i++) {
+        nodeEls[i].style.left = `${((i - 1) * 80) + 20}px`;
+        nodeEls[i].classList.add("done");
+        if (arrowEls[i]) {
+            arrowEls[i].style.left = `${((i - 1) * 80) + 70}px`;
+        }
+    }
+    
+    await delay(1000);
+    status.className = "status-panel success";
+    status.innerHTML = `<strong>Complete!</strong> Node 4 is removed. Return <code>dummy.next</code> (Node 1).`;
+    
+    btn.disabled = false;
+    btn.textContent = "↻ Replay";
+  });
+})();
+</script>
+{% endblock %}
